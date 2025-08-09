@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialAnimal.Core", "SocialAnimal.Core\SocialAnimal.Core.csproj", "{E7927594-0E5A-48FC-883E-DDA207923252}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialAnimal.Infrastructure", "SocialAnimal.Infrastructure\SocialAnimal.Infrastructure.csproj", "{1D7C4AF8-DD5B-4F2D-B051-F4754A39307B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialAnimal.Web", "SocialAnimal.Web\SocialAnimal.Web.csproj", "{C945A092-75C7-4982-AB63-287C7989C387}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialAnimal.Tests", "SocialAnimal.Tests\SocialAnimal.Tests.csproj", "{930B2DF3-5A01-4287-8EB6-77F85C69FD30}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E7927594-0E5A-48FC-883E-DDA207923252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7927594-0E5A-48FC-883E-DDA207923252}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7927594-0E5A-48FC-883E-DDA207923252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7927594-0E5A-48FC-883E-DDA207923252}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D7C4AF8-DD5B-4F2D-B051-F4754A39307B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D7C4AF8-DD5B-4F2D-B051-F4754A39307B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D7C4AF8-DD5B-4F2D-B051-F4754A39307B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D7C4AF8-DD5B-4F2D-B051-F4754A39307B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C945A092-75C7-4982-AB63-287C7989C387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C945A092-75C7-4982-AB63-287C7989C387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C945A092-75C7-4982-AB63-287C7989C387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C945A092-75C7-4982-AB63-287C7989C387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{930B2DF3-5A01-4287-8EB6-77F85C69FD30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{930B2DF3-5A01-4287-8EB6-77F85C69FD30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{930B2DF3-5A01-4287-8EB6-77F85C69FD30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{930B2DF3-5A01-4287-8EB6-77F85C69FD30}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

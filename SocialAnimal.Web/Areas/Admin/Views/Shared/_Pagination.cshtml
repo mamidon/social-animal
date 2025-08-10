@@ -1,0 +1,72 @@
+@model PagedResult<object>
+
+<div class="pagination-container">
+    <div class="pagination-info">
+        Showing @Model.StartItem - @Model.EndItem of @Model.TotalCount
+    </div>
+    
+    <nav class="pagination">
+        @if(Model.HasPrevious)
+        {
+            <a href="#"
+               hx-get="@GetCurrentUrl(Model.Page - 1)"
+               hx-target="#user-list"
+               hx-include="#filters"
+               class="page-link">
+                Previous
+            </a>
+        }
+        
+        @{
+            var startPage = Math.Max(1, Model.Page - 2);
+            var endPage = Math.Min(Model.TotalPages, Model.Page + 2);
+        }
+        
+        @for(int i = startPage; i <= endPage; i++)
+        {
+            <a href="#"
+               hx-get="@GetCurrentUrl(i)"
+               hx-target="#user-list"
+               hx-include="#filters"
+               class="page-link @(i == Model.Page ? "active" : "")">
+                @i
+            </a>
+        }
+        
+        @if(Model.HasNext)
+        {
+            <a href="#"
+               hx-get="@GetCurrentUrl(Model.Page + 1)"
+               hx-target="#user-list"
+               hx-include="#filters"
+               class="page-link">
+                Next
+            </a>
+        }
+    </nav>
+    
+    <div class="page-size-selector">
+        <label>Show:</label>
+        <select hx-get="@GetCurrentUrl(1)"
+                hx-target="#user-list"
+                hx-include="#filters"
+                name="pageSize">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+</div>
+
+@functions {
+    private string GetCurrentUrl(int page)
+    {
+        var currentPath = ViewContext.HttpContext.Request.Path.Value;
+        if (currentPath?.EndsWith("/") == false)
+        {
+            currentPath += "/";
+        }
+        return $"{currentPath}list-partial?page={page}";
+    }
+}

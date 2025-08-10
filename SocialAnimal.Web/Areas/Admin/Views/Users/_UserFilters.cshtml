@@ -1,0 +1,42 @@
+@model UserListFilters
+
+<form id="filter-form" 
+      hx-get="/admin/users/list-partial"
+      hx-target="#user-list"
+      hx-trigger="change">
+    
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" 
+               name="search" 
+               value="@Model.Search"
+               placeholder="Name or phone..."
+               hx-get="/admin/users/list-partial"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#user-list"
+               hx-include="#filter-form">
+    </div>
+    
+    <div class="filter-group">
+        <label>
+            <input type="checkbox" 
+                   name="includeDeleted" 
+                   value="true"
+                   @(Model.IncludeDeleted ? "checked" : "")>
+            Include Deleted
+        </label>
+    </div>
+    
+    <button type="button" 
+            onclick="clearFilters()"
+            class="btn btn-link">
+        Clear Filters
+    </button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    htmx.trigger('#filter-form', 'submit');
+}
+</script>

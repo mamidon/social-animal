@@ -1,0 +1,163 @@
+@model UserFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Create User" : "Edit User";
+}
+
+<div class="form-page">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/users">Users</a> /
+            <span>@ViewData["Title"]</span>
+        </div>
+        
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="user-form"
+              hx-post="@(Model.IsNew ? "/admin/users/create" : $"/admin/users/{Model.User.Id}/edit")"
+              hx-target="#form-result"
+              hx-swap="innerHTML"
+              hx-indicator="#form-loading">
+              
+            @Html.AntiForgeryToken()
+            
+            <!-- Hidden fields -->
+            @if(!Model.IsNew)
+            {
+                <input type="hidden" asp-for="User.Id" />
+            }
+            
+            <!-- Form Errors Container -->
+            <div id="form-result"></div>
+            
+            <!-- User Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">User Information</h2>
+                
+                <div class="form-group">
+                    <label asp-for="User.FirstName" class="required">
+                        First Name
+                    </label>
+                    <input asp-for="User.FirstName" 
+                           class="form-control"
+                           placeholder="John"
+                           autofocus />
+                    <span asp-validation-for="User.FirstName" class="field-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="User.LastName" class="required">
+                        Last Name
+                    </label>
+                    <input asp-for="User.LastName" 
+                           class="form-control"
+                           placeholder="Doe" />
+                    <span asp-validation-for="User.LastName" class="field-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="User.Phone" class="required">
+                        Phone Number
+                    </label>
+                    <input asp-for="User.Phone" 
+                           type="tel"
+                           class="form-control"
+                           placeholder="+1 (555) 123-4567"
+                           data-mask="+1 (000) 000-0000" />
+                    <span asp-validation-for="User.Phone" class="field-error"></span>
+                    <small class="form-text">
+                        Phone number in international format (e.g., +1 555 123-4567)
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        @(Model.IsNew ? "Create User" : "Save Changes")
+                    </button>
+                    
+                    @if(Model.IsNew)
+                    {
+                        <button type="submit" 
+                                class="btn btn-secondary"
+                                name="createAndContinue"
+                                value="true">
+                            Save & Add Another
+                        </button>
+                    }
+                    
+                    <a href="@(Model.IsNew ? "/admin/users" : $"/admin/users/{Model.User.Id}")" 
+                       class="btn btn-link">
+                        Cancel
+                    </a>
+                </div>
+                
+                <div class="form-actions-right">
+                    <span class="auto-save-status" id="auto-save-status" style="display:none;">
+                        <i class="fas fa-check"></i> Draft saved
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="form-loading" class="form-loading" style="display:none;">
+                <div class="spinner-border"></div>
+                Saving...
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Phone number formatting
+    const phoneInput = document.querySelector('[data-mask]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    value = `+1 (${value}`;
+                } else if (value.length <= 6) {
+                    value = `+1 (${value.slice(0, 3)}) ${value.slice(3)}`;
+                } else {
+                    value = `+1 (${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                }
+            }
+            
+            e.target.value = value;
+        });
+    }
+    
+    // Form change tracking
+    let formChanged = false;
+    const form = document.getElementById('user-form');
+    
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+    
+    // Warn on navigation if unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+    
+    // Clear warning on successful submit
+    form.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            formChanged = false;
+        }
+    });
+});
+</script>

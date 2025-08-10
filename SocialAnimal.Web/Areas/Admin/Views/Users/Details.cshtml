@@ -1,0 +1,278 @@
+@model UserDetailsViewModel
+@{
+    ViewData["Title"] = Model.User.FullName;
+}
+
+<div class="detail-page">
+    <!-- Page Header -->
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/users">Users</a> /
+            <span>@Model.User.FullName</span>
+        </div>
+        
+        <div class="detail-title-row">
+            <h1>@Model.User.FullName</h1>
+            
+            <div class="detail-actions">
+                <a href="/admin/users/@Model.User.Slug/edit" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                @if(Model.User.IsDeleted)
+                {
+                    <button class="btn btn-success"
+                            hx-post="/admin/users/@Model.User.Id/restore"
+                            hx-confirm="Restore this user?">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-danger"
+                            hx-delete="/admin/users/@Model.User.Id"
+                            hx-confirm="Delete this user?">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <!-- Status Badges -->
+        <div class="status-badges">
+            @if(Model.User.IsDeleted)
+            {
+                <span class="badge badge-danger">Deleted</span>
+            }
+            else
+            {
+                <span class="badge badge-success">Active</span>
+            }
+            
+            <span class="badge badge-info">
+                @Model.Statistics.TotalReservations reservations
+            </span>
+        </div>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="detail-content">
+        <!-- Left Column - Main Info -->
+        <div class="detail-main">
+            <!-- User Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>User Information</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Full Name</dt>
+                        <dd>@Model.User.FullName</dd>
+                        
+                        <dt>Phone Number</dt>
+                        <dd>
+                            <a href="tel:@Model.User.Phone">@Model.User.Phone</a>
+                        </dd>
+                        
+                        <dt>Slug</dt>
+                        <dd>
+                            <code>@Model.User.Slug</code>
+                            <button class="btn-icon btn-sm"
+                                    onclick="copyToClipboard('@Model.User.Slug')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </dd>
+                        
+                        <dt>Created</dt>
+                        <dd>
+                            <time datetime="@Model.User.CreatedOn">
+                                @Model.User.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                            </time>
+                        </dd>
+                        
+                        <dt>Last Modified</dt>
+                        <dd>
+                            @if(Model.User.UpdatedOn.HasValue)
+                            {
+                                <time datetime="@Model.User.UpdatedOn">
+                                    @Model.User.UpdatedOn.Value.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never</span>
+                            }
+                        </dd>
+                        
+                        @if(Model.User.IsDeleted)
+                        {
+                            <dt>Deleted</dt>
+                            <dd>
+                                <time datetime="@Model.User.DeletedAt">
+                                    @Model.User.DeletedAt.Value.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Reservations Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Reservations (@Model.Statistics.TotalReservations)</h2>
+                    <div class="card-actions">
+                        <a href="/admin/reservations?userId=@Model.User.Id" 
+                           class="btn btn-sm btn-secondary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if(Model.Reservations.Any())
+                    {
+                        <table class="compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Party Size</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var reservation in Model.Reservations.Take(10))
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/events/@reservation.EventId">
+                                                Event @reservation.EventId
+                                            </a>
+                                        </td>
+                                        <td>@reservation.PartySize</td>
+                                        <td>
+                                            @if(reservation.PartySize > 0)
+                                            {
+                                                <span class="text-success">Attending</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-danger">Regrets</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <time datetime="@reservation.CreatedOn">
+                                                @reservation.CreatedOn.ToDateTimeOffset().ToString("MMM dd, yyyy")
+                                            </time>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        
+                        @if(Model.Reservations.Count > 10)
+                        {
+                            <div class="text-center mt-3">
+                                <a href="/admin/reservations?userId=@Model.User.Id" class="btn btn-link">
+                                    View all @Model.Statistics.TotalReservations reservations
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state-small">
+                            <p>No reservations yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Statistics & Actions -->
+        <div class="detail-sidebar">
+            <!-- Statistics Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Statistics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.TotalReservations</span>
+                            <span class="stat-label">Total Reservations</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.AttendedEvents</span>
+                            <span class="stat-label">Attended Events</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.RegretEvents</span>
+                            <span class="stat-label">Regrets</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.TotalPartySize</span>
+                            <span class="stat-label">Total Guests</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.AttendanceRate.ToString("F1")%</span>
+                            <span class="stat-label">Attendance Rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-list">
+                        <a href="/admin/invitations/create?userId=@Model.User.Id" 
+                           class="action-item">
+                            <i class="fas fa-envelope"></i>
+                            Create Invitation
+                        </a>
+                        <a href="tel:@Model.User.Phone" 
+                           class="action-item">
+                            <i class="fas fa-phone"></i>
+                            Call User
+                        </a>
+                        <button class="action-item"
+                                onclick="exportUserData(@Model.User.Id)">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                        <a href="/admin/users/merge?sourceId=@Model.User.Id" 
+                           class="action-item">
+                            <i class="fas fa-users"></i>
+                            Merge with Another User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show temporary success message
+        const button = event.target.closest('button');
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        
+        icon.className = 'fas fa-check';
+        setTimeout(() => {
+            icon.className = originalClass;
+        }, 1000);
+    });
+}
+
+function exportUserData(userId) {
+    window.location.href = `/admin/users/${userId}/export`;
+}
+</script>

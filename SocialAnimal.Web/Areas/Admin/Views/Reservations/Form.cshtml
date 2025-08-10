@@ -1,0 +1,211 @@
+@model ReservationFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Create Reservation" : "Edit Reservation";
+}
+
+<div class="form-page">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/reservations">Reservations</a> /
+            <span>@ViewData["Title"]</span>
+        </div>
+        
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="reservation-form"
+              hx-post="@(Model.IsNew ? "/admin/reservations/create" : $"/admin/reservations/{Model.Reservation.Id}/edit")"
+              hx-target="#form-result"
+              hx-swap="innerHTML"
+              hx-indicator="#form-loading">
+              
+            @Html.AntiForgeryToken()
+            
+            <!-- Hidden fields -->
+            @if(!Model.IsNew)
+            {
+                <input type="hidden" asp-for="Reservation.Id" />
+            }
+            
+            <!-- Form Errors Container -->
+            <div id="form-result"></div>
+            
+            <!-- Reservation Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Reservation Details</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Reservation.InvitationId" class="required">
+                        Invitation
+                    </label>
+                    <select asp-for="Reservation.InvitationId" 
+                            asp-items="Model.InvitationOptions"
+                            class="form-control">
+                        <option value="">Select Invitation</option>
+                    </select>
+                    <span asp-validation-for="Reservation.InvitationId" class="field-error"></span>
+                    <small class="form-text">
+                        Choose the invitation this reservation is for
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Reservation.UserId" class="required">
+                        User
+                    </label>
+                    <select asp-for="Reservation.UserId" 
+                            asp-items="Model.UserOptions"
+                            class="form-control">
+                        <option value="">Select User</option>
+                    </select>
+                    <span asp-validation-for="Reservation.UserId" class="field-error"></span>
+                    <small class="form-text">
+                        Associate this reservation with a user account
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Reservation.PartySize" class="required">
+                        Party Size
+                    </label>
+                    <input asp-for="Reservation.PartySize" 
+                           type="number"
+                           min="0"
+                           max="20"
+                           class="form-control"
+                           placeholder="1" 
+                           autofocus />
+                    <span asp-validation-for="Reservation.PartySize" class="field-error"></span>
+                    <small class="form-text">
+                        Number of people attending (0 = regrets/cannot attend)
+                    </small>
+                </div>
+                
+                <div class="attendance-indicator" id="attendance-status">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="status-text">Status will be determined by party size</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Additional Information</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Reservation.Notes">
+                        Notes
+                    </label>
+                    <textarea asp-for="Reservation.Notes" 
+                              class="form-control"
+                              rows="3"
+                              placeholder="Any additional notes about this reservation..."></textarea>
+                    <span asp-validation-for="Reservation.Notes" class="field-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Reservation.DietaryRestrictions">
+                        Dietary Restrictions
+                    </label>
+                    <textarea asp-for="Reservation.DietaryRestrictions" 
+                              class="form-control"
+                              rows="2"
+                              placeholder="Any dietary restrictions or special requirements..."></textarea>
+                    <span asp-validation-for="Reservation.DietaryRestrictions" class="field-error"></span>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        @(Model.IsNew ? "Create Reservation" : "Save Changes")
+                    </button>
+                    
+                    @if(Model.IsNew)
+                    {
+                        <button type="submit" 
+                                class="btn btn-secondary"
+                                name="createAndContinue"
+                                value="true">
+                            Save & Add Another
+                        </button>
+                    }
+                    
+                    <a href="@(Model.IsNew ? "/admin/reservations" : $"/admin/reservations/{Model.Reservation.Id}")" 
+                       class="btn btn-link">
+                        Cancel
+                    </a>
+                </div>
+                
+                <div class="form-actions-right">
+                    <span class="auto-save-status" id="auto-save-status" style="display:none;">
+                        <i class="fas fa-check"></i> Draft saved
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="form-loading" class="form-loading" style="display:none;">
+                <div class="spinner-border"></div>
+                Saving...
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Party size change handler
+    const partySizeInput = document.querySelector('input[name="Reservation.PartySize"]');
+    const statusDiv = document.getElementById('attendance-status');
+    const statusText = document.getElementById('status-text');
+    
+    function updateAttendanceStatus() {
+        const partySize = parseInt(partySizeInput.value) || 0;
+        const alertDiv = statusDiv.querySelector('.alert');
+        
+        if (partySize === 0) {
+            alertDiv.className = 'alert alert-warning';
+            statusText.innerHTML = '<i class="fas fa-times"></i> Regrets - Guest cannot attend';
+        } else {
+            alertDiv.className = 'alert alert-success';
+            statusText.innerHTML = `<i class="fas fa-check"></i> Attending - Party of ${partySize}`;
+        }
+    }
+    
+    partySizeInput.addEventListener('input', updateAttendanceStatus);
+    
+    // Initial status update
+    updateAttendanceStatus();
+    
+    // Form change tracking
+    let formChanged = false;
+    const form = document.getElementById('reservation-form');
+    
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+    
+    // Warn on navigation if unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+    
+    // Clear warning on successful submit
+    form.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            formChanged = false;
+        }
+    });
+});
+</script>

@@ -1,0 +1,158 @@
+@model PagedResult<ReservationListItem>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="checkbox-column">
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th class="sortable" 
+                    hx-get="/admin/reservations/list-partial?sortBy=GuestName"
+                    hx-target="#reservation-list"
+                    hx-include="#filters">
+                    Guest Name
+                    <i class="sort-icon"></i>
+                </th>
+                <th>Contact</th>
+                <th class="sortable"
+                    hx-get="/admin/reservations/list-partial?sortBy=EventTitle"
+                    hx-target="#reservation-list"
+                    hx-include="#filters">
+                    Event
+                    <i class="sort-icon"></i>
+                </th>
+                <th class="sortable"
+                    hx-get="/admin/reservations/list-partial?sortBy=PartySize"
+                    hx-target="#reservation-list"
+                    hx-include="#filters">
+                    Party Size
+                    <i class="sort-icon"></i>
+                </th>
+                <th>Status</th>
+                <th class="sortable"
+                    hx-get="/admin/reservations/list-partial?sortBy=CreatedOn"
+                    hx-target="#reservation-list"
+                    hx-include="#filters">
+                    Created
+                    <i class="sort-icon"></i>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(Model.Data.Any())
+            {
+                @foreach(var reservation in Model.Data)
+                {
+                    <tr data-id="@reservation.Id">
+                        <td>
+                            <input type="checkbox" 
+                                   class="row-select" 
+                                   value="@reservation.Id">
+                        </td>
+                        <td>
+                            <a href="/admin/reservations/@reservation.Id"
+                               hx-boost="true">
+                                @reservation.GuestName
+                            </a>
+                        </td>
+                        <td class="text-muted">
+                            @if(!string.IsNullOrEmpty(reservation.Email))
+                            {
+                                <a href="mailto:@reservation.Email">@reservation.Email</a>
+                            }
+                            else if(!string.IsNullOrEmpty(reservation.Phone))
+                            {
+                                <a href="tel:@reservation.Phone">@reservation.Phone</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No contact</span>
+                            }
+                        </td>
+                        <td>
+                            @reservation.EventTitle
+                        </td>
+                        <td>
+                            <span class="badge @(reservation.IsAttending ? "badge-success" : "badge-secondary")">
+                                @reservation.PartySize
+                            </span>
+                        </td>
+                        <td>
+                            @if(reservation.IsAttending)
+                            {
+                                <span class="status-badge attending">Attending</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge regrets">Regrets</span>
+                            }
+                        </td>
+                        <td>
+                            <time datetime="@reservation.CreatedOn">
+                                @reservation.CreatedOn.ToString("MMM dd, yyyy")
+                            </time>
+                        </td>
+                        <td class="actions">
+                            <div class="action-menu">
+                                <a href="/admin/reservations/@reservation.Id"
+                                   class="btn-icon"
+                                   title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/admin/reservations/@reservation.Id/edit"
+                                   class="btn-icon"
+                                   title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                @if(reservation.IsAttending)
+                                {
+                                    <button class="btn-icon"
+                                            hx-post="/admin/reservations/@reservation.Id/mark-attended"
+                                            hx-confirm="Mark as attended?"
+                                            title="Mark Attended">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                }
+                                <button class="btn-icon"
+                                        hx-post="/admin/reservations/@reservation.Id/send-reminder"
+                                        hx-confirm="Send reminder?"
+                                        title="Send Reminder">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                                <button class="btn-icon"
+                                        hx-delete="/admin/reservations/@reservation.Id"
+                                        hx-confirm="Delete this reservation?"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-check fa-3x mb-3"></i>
+                            <h4>No reservations found</h4>
+                            <p>No reservations match your current search criteria.</p>
+                            <a href="/admin/reservations/create" class="btn btn-primary">
+                                Create First Reservation
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    @if(Model.TotalPages > 1)
+    {
+        @await Html.PartialAsync("_Pagination", Model)
+    }
+</div>

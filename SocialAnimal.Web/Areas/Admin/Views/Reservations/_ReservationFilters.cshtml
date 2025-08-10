@@ -1,0 +1,57 @@
+@model ReservationListFilters
+
+<form id="filter-form" 
+      hx-get="/admin/reservations/list-partial"
+      hx-target="#reservation-list"
+      hx-trigger="change">
+    
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" 
+               name="search" 
+               value="@Model.Search"
+               placeholder="Guest name or contact..."
+               hx-get="/admin/reservations/list-partial"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#reservation-list"
+               hx-include="#filter-form">
+    </div>
+    
+    <div class="filter-group">
+        <label>Event</label>
+        <select name="eventId" id="event-filter">
+            <option value="">All Events</option>
+            @* Event options would be populated from the controller *@
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>User</label>
+        <select name="userId" id="user-filter">
+            <option value="">All Users</option>
+            @* User options would be populated from the controller *@
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Attendance</label>
+        <select name="isAttending">
+            <option value="">All</option>
+            <option value="true" @(Model.IsAttending == true ? "selected" : "")>Attending</option>
+            <option value="false" @(Model.IsAttending == false ? "selected" : "")>Regrets</option>
+        </select>
+    </div>
+    
+    <button type="button" 
+            onclick="clearFilters()"
+            class="btn btn-link">
+        Clear Filters
+    </button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    htmx.trigger('#filter-form', 'submit');
+}
+</script>

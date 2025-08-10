@@ -1,0 +1,189 @@
+@model ReservationDetailsViewModel
+@{
+    ViewData["Title"] = $"Reservation for {Model.GuestName}";
+}
+
+<div class="detail-page">
+    <!-- Page Header -->
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/reservations">Reservations</a> /
+            <span>@Model.GuestName</span>
+        </div>
+        
+        <div class="detail-title-row">
+            <h1>Reservation for @Model.GuestName</h1>
+            
+            <div class="detail-actions">
+                <a href="/admin/reservations/@Model.Reservation.Id/edit" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                @if(Model.IsAttending)
+                {
+                    <button class="btn btn-success"
+                            hx-post="/admin/reservations/@Model.Reservation.Id/mark-attended"
+                            hx-confirm="Mark as attended?">
+                        <i class="fas fa-check"></i> Mark Attended
+                    </button>
+                }
+                <button class="btn btn-info"
+                        hx-post="/admin/reservations/@Model.Reservation.Id/send-reminder"
+                        hx-confirm="Send reminder to guest?">
+                    <i class="fas fa-bell"></i> Send Reminder
+                </button>
+                <button class="btn btn-danger"
+                        hx-delete="/admin/reservations/@Model.Reservation.Id"
+                        hx-confirm="Delete this reservation?">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        
+        <!-- Status Badges -->
+        <div class="status-badges">
+            @if(Model.IsAttending)
+            {
+                <span class="badge badge-success">
+                    Attending (@Model.Reservation.PartySize)
+                </span>
+            }
+            else
+            {
+                <span class="badge badge-secondary">Regrets</span>
+            }
+            
+            @if(Model.Statistics.HasBeenModified)
+            {
+                <span class="badge badge-info">Modified</span>
+            }
+        </div>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="detail-content">
+        <!-- Left Column - Main Info -->
+        <div class="detail-main">
+            <!-- Reservation Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Reservation Details</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Guest Name</dt>
+                        <dd>@Model.GuestName</dd>
+                        
+                        @if(!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <dt>Email</dt>
+                            <dd>
+                                <a href="mailto:@Model.Email">@Model.Email</a>
+                            </dd>
+                        }
+                        
+                        @if(!string.IsNullOrEmpty(Model.Phone))
+                        {
+                            <dt>Phone</dt>
+                            <dd>
+                                <a href="tel:@Model.Phone">@Model.Phone</a>
+                            </dd>
+                        }
+                        
+                        <dt>Party Size</dt>
+                        <dd>
+                            <span class="party-size @(Model.IsAttending ? "attending" : "regrets")">
+                                @Model.Reservation.PartySize
+                                @if(Model.IsAttending)
+                                {
+                                    <span class="text-muted">attending</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">regrets</span>
+                                }
+                            </span>
+                        </dd>
+                        
+                        <dt>Reservation ID</dt>
+                        <dd>
+                            <code>#@Model.Reservation.Id</code>
+                        </dd>
+                        
+                        <dt>Created</dt>
+                        <dd>
+                            <time datetime="@Model.Reservation.CreatedOn">
+                                @Model.Reservation.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                            </time>
+                        </dd>
+                        
+                        @if(Model.Reservation.UpdatedOn.HasValue)
+                        {
+                            <dt>Last Modified</dt>
+                            <dd>
+                                <time datetime="@Model.Reservation.UpdatedOn">
+                                    @Model.Reservation.UpdatedOn.Value.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Event Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Event Information</h2>
+                </div>
+                <div class="card-body">
+                    @if(Model.Event != null)
+                    {
+                        <dl class="detail-list">
+                            <dt>Event Title</dt>
+                            <dd>
+                                <a href="/admin/events/@Model.Event.Slug">
+                                    @Model.Event.Title
+                                </a>
+                            </dd>
+                            
+                            <dt>Location</dt>
+                            <dd>@Model.Event.FullAddress</dd>
+                            
+                            <dt>Event Created</dt>
+                            <dd>
+                                <time datetime="@Model.Event.CreatedOn">
+                                    @Model.Event.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy")
+                                </time>
+                            </dd>
+                        </dl>
+                        
+                        <div class="location-actions mt-3">
+                            <a href="https://maps.google.com/?q=@Uri.EscapeDataString(Model.Event.FullAddress)" 
+                               target="_blank" 
+                               class="btn btn-link">
+                                <i class="fas fa-map-marker-alt"></i> View on Google Maps
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Event information not available</p>
+                    }
+                </div>
+            </div>
+            
+            <!-- Invitation Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Related Invitation</h2>
+                </div>
+                <div class="card-body">
+                    @if(Model.Invitation != null)
+                    {
+                        <dl class="detail-list">
+                            <dt>Invitation</dt>
+                            <dd>
+                                <a href="/admin/invitations/@Model.Invitation.Slug">
+                                    @Model.Invitation.Slug
+                                </a>\n                            </dd>\n                            \n                            <dt>Invitation Created</dt>\n                            <dd>\n                                <time datetime="@Model.Invitation.CreatedOn">\n                                    @Model.Invitation.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")\n                                </time>\n                            </dd>\n                        </dl>\n                    }\n                    else\n                    {\n                        <p class="text-muted">Invitation information not available</p>\n                    }\n                </div>\n            </div>\n            \n            <!-- Additional Information Card -->\n            @if(!string.IsNullOrEmpty(Model.Notes) || !string.IsNullOrEmpty(Model.DietaryRestrictions))\n            {\n                <div class="detail-card">\n                    <div class="card-header">\n                        <h2>Additional Information</h2>\n                    </div>\n                    <div class="card-body">\n                        <dl class="detail-list">\n                            @if(!string.IsNullOrEmpty(Model.Notes))\n                            {\n                                <dt>Notes</dt>\n                                <dd>@Model.Notes</dd>\n                            }\n                            \n                            @if(!string.IsNullOrEmpty(Model.DietaryRestrictions))\n                            {\n                                <dt>Dietary Restrictions</dt>\n                                <dd>@Model.DietaryRestrictions</dd>\n                            }\n                        </dl>\n                    </div>\n                </div>\n            }\n        </div>\n        \n        <!-- Right Column - Stats & Actions -->\n        <div class="detail-sidebar">\n            <!-- Statistics Card -->\n            <div class="detail-card">\n                <div class="card-header">\n                    <h2>Statistics</h2>\n                </div>\n                <div class="card-body">\n                    <div class="stat-grid">\n                        <div class="stat-item">\n                            <span class="stat-value">@Model.Statistics.ResponseTime.TotalDays.ToString("F0")</span>\n                            <span class="stat-label">Days to Respond</span>\n                        </div>\n                        <div class="stat-item">\n                            <span class="stat-value">@Model.Statistics.ModificationCount</span>\n                            <span class="stat-label">Modifications</span>\n                        </div>\n                    </div>\n                    \n                    @if(Model.Statistics.IsLateResponse)\n                    {\n                        <div class="alert alert-warning mt-3">\n                            <i class="fas fa-clock"></i>\n                            Late response (responded after event date)\n                        </div>\n                    }\n                </div>\n            </div>\n            \n            <!-- Quick Actions Card -->\n            <div class="detail-card">\n                <div class="card-header">\n                    <h2>Quick Actions</h2>\n                </div>\n                <div class="card-body">\n                    <div class="quick-actions-list">\n                        @if(Model.HasContact)\n                        {\n                            @if(!string.IsNullOrEmpty(Model.Email))\n                            {\n                                <a href="mailto:@Model.Email" class="action-item">\n                                    <i class="fas fa-envelope"></i>\n                                    Send Email\n                                </a>\n                            }\n                            @if(!string.IsNullOrEmpty(Model.Phone))\n                            {\n                                <a href="tel:@Model.Phone" class="action-item">\n                                    <i class="fas fa-phone"></i>\n                                    Call Guest\n                                </a>\n                            }\n                        }\n                        \n                        <a href="/admin/invitations/@(Model.Invitation?.Slug ?? Model.Reservation.InvitationId)" \n                           class="action-item">\n                            <i class="fas fa-envelope-open"></i>\n                            View Invitation\n                        </a>\n                        \n                        @if(Model.User != null)\n                        {\n                            <a href="/admin/users/@Model.User.Slug" \n                               class="action-item">\n                                <i class="fas fa-user"></i>\n                                View User Profile\n                            </a>\n                        }\n                        \n                        <button class="action-item"\n                                onclick="exportReservationData(@Model.Reservation.Id)">\n                            <i class="fas fa-download"></i>\n                            Export Data\n                        </button>\n                        \n                        <button class="action-item"\n                                onclick="duplicateReservation(@Model.Reservation.Id)">\n                            <i class="fas fa-copy"></i>\n                            Duplicate Reservation\n                        </button>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n\n<script>\nfunction exportReservationData(reservationId) {\n    window.location.href = `/admin/reservations/${reservationId}/export`;\n}\n\nfunction duplicateReservation(reservationId) {\n    if (confirm('Create a copy of this reservation?')) {\n        window.location.href = `/admin/reservations/create?duplicateFrom=${reservationId}`;\n    }\n}\n</script>

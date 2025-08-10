@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Social Animal Admin</title>
+    
+    <!-- CSS -->
+    <link href="~/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/admin/variables.css" rel="stylesheet" />
+    <link href="~/css/admin/layout.css" rel="stylesheet" />
+    <link href="~/css/admin/htmx.css" rel="stylesheet" />
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="@Html.AntiForgeryToken()">
+</head>
+<body class="admin-layout">
+    <!-- Global Loading Indicator -->
+    <div id="global-loader" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Sidebar -->
+    <nav class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <a href="/admin" class="sidebar-brand">
+                <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="sidebar-brand-text">Social Animal</span>
+            </a>
+        </div>
+        
+        <div class="admin-nav">
+            <div class="admin-nav-item">
+                <a href="/admin" class="admin-nav-link @(ViewData["ControllerName"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                    </svg>
+                    <span class="admin-nav-text">Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="admin-nav-item">
+                <a href="/admin/events" class="admin-nav-link @(ViewData["ControllerName"]?.ToString() == "Events" ? "active" : "")">
+                    <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="admin-nav-text">Events</span>
+                </a>
+            </div>
+            
+            <div class="admin-nav-item">
+                <a href="/admin/users" class="admin-nav-link @(ViewData["ControllerName"]?.ToString() == "Users" ? "active" : "")">
+                    <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                    </svg>
+                    <span class="admin-nav-text">Users</span>
+                </a>
+            </div>
+            
+            <div class="admin-nav-item">
+                <a href="/admin/invitations" class="admin-nav-link @(ViewData["ControllerName"]?.ToString() == "Invitations" ? "active" : "")">
+                    <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.94 6.412A2 2 0 002 8.108V16a2 2 0 002 2h12a2 2 0 002-2V8.108a2 2 0 00-.94-1.696l-6-3.75a2 2 0 00-2.12 0l-6 3.75zm2.615 2.423a1 1 0 10-1.11 1.664l5 3.333a1 1 0 001.11 0l5-3.333a1 1 0 00-1.11-1.664L10 10.798 5.555 8.835z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="admin-nav-text">Invitations</span>
+                </a>
+            </div>
+            
+            <div class="admin-nav-item">
+                <a href="/admin/reservations" class="admin-nav-link @(ViewData["ControllerName"]?.ToString() == "Reservations" ? "active" : "")">
+                    <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="admin-nav-text">Reservations</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+            <h1 class="h5 mb-0">@ViewData["Title"]</h1>
+        </div>
+        <div class="admin-header-right">
+            <!-- Add user menu, notifications, etc. here -->
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Error Container -->
+        <div id="error-container" class="mb-3" style="display: none;"></div>
+        
+        <!-- Toast Container -->
+        <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+        
+        @RenderBody()
+    </main>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- JavaScript -->
+    <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/htmx/htmx.min.js"></script>
+    <script src="~/js/admin/htmx-config.js"></script>
+    
+    <script>
+        // Basic sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+        
+        // Close sidebar on overlay click (mobile)
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        });
+        
+        // Initialize components on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeComponents();
+        });
+    </script>
+    
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

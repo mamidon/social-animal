@@ -1,0 +1,130 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Overview of your Social Animal application</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="admin-card">
+            <div class="admin-card-body text-center">
+                <div class="text-primary mb-3">
+                    <svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="h4">Events</h3>
+                <p class="text-muted mb-3">Manage your events</p>
+                <a href="/admin/events" class="btn btn-primary">View Events</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="admin-card">
+            <div class="admin-card-body text-center">
+                <div class="text-success mb-3">
+                    <svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                    </svg>
+                </div>
+                <h3 class="h4">Users</h3>
+                <p class="text-muted mb-3">Manage your users</p>
+                <a href="/admin/users" class="btn btn-success">View Users</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="admin-card">
+            <div class="admin-card-body text-center">
+                <div class="text-warning mb-3">
+                    <svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.94 6.412A2 2 0 002 8.108V16a2 2 0 002 2h12a2 2 0 002-2V8.108a2 2 0 00-.94-1.696l-6-3.75a2 2 0 00-2.12 0l-6 3.75zm2.615 2.423a1 1 0 10-1.11 1.664l5 3.333a1 1 0 001.11 0l5-3.333a1 1 0 00-1.11-1.664L10 10.798 5.555 8.835z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="h4">Invitations</h3>
+                <p class="text-muted mb-3">Manage invitations</p>
+                <a href="/admin/invitations" class="btn btn-warning">View Invitations</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="admin-card">
+            <div class="admin-card-body text-center">
+                <div class="text-info mb-3">
+                    <svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="h4">Reservations</h3>
+                <p class="text-muted mb-3">Manage RSVPs</p>
+                <a href="/admin/reservations" class="btn btn-info">View Reservations</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="mb-0">Welcome to Social Animal Admin</h5>
+            </div>
+            <div class="admin-card-body">
+                <p>This is your administrative dashboard for managing events, users, invitations, and reservations.</p>
+                <p>Use the navigation menu to access different sections:</p>
+                <ul>
+                    <li><strong>Events:</strong> Create and manage your events with location details</li>
+                    <li><strong>Users:</strong> Manage user accounts and their information</li>
+                    <li><strong>Invitations:</strong> Send and track event invitations</li>
+                    <li><strong>Reservations:</strong> Monitor RSVPs and attendance</li>
+                </ul>
+                
+                <div class="alert alert-info mt-4">
+                    <h6 class="alert-heading">HTMX Integration</h6>
+                    <p class="mb-0">This admin portal uses HTMX for seamless, dynamic interactions without full page refreshes. Try navigating between sections to experience the smooth transitions!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-grid gap-2">
+                    <a href="/admin/events/create" class="btn btn-primary">Create New Event</a>
+                    <a href="/admin/users/create" class="btn btn-success">Add New User</a>
+                    <a href="/admin/invitations/create" class="btn btn-warning">Send Invitation</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Database</span>
+                    <span class="badge bg-success">Connected</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Services</span>
+                    <span class="badge bg-success">Running</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>HTMX</span>
+                    <span class="badge bg-success">Loaded</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -8,22 +8,44 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        // Table name will be snake_cased automatically
         builder.ToTable("users");
         
-        // Configure Reference to follow pattern
-        builder.Property(u => u.Reference)
-            .HasDefaultValueSql("'user_' || gen_random_uuid()::text");
+        // Primary key
+        builder.HasKey(u => u.Id);
         
-        // Configure relationships
-        builder.HasMany(u => u.OrganizedEvents)
-            .WithOne(e => e.Organizer)
-            .HasForeignKey(e => e.OrganizerId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // Indexes
+        builder.HasIndex(u => u.Slug)
+            .IsUnique()
+            .HasDatabaseName("ix_users_slug");
+            
+        builder.HasIndex(u => u.Phone)
+            .HasDatabaseName("ix_users_phone");
+            
+        builder.HasIndex(u => u.DeletedAt)
+            .HasDatabaseName("ix_users_deleted_at");
         
-        builder.HasMany(u => u.EventAttendances)
-            .WithOne(ea => ea.User)
-            .HasForeignKey(ea => ea.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Properties
+        builder.Property(u => u.Slug)
+            .IsRequired()
+            .HasMaxLength(100);
+            
+        builder.Property(u => u.FirstName)
+            .IsRequired()
+            .HasMaxLength(100);
+            
+        builder.Property(u => u.LastName)
+            .IsRequired()
+            .HasMaxLength(100);
+            
+        builder.Property(u => u.Phone)
+            .IsRequired()
+            .HasMaxLength(20);
+            
+        // Soft delete query filter
+        builder.HasQueryFilter(u => u.DeletedAt == null);
+        
+        // Concurrency token
+        builder.Property(u => u.ConcurrencyToken)
+            .IsConcurrencyToken();
     }
 }

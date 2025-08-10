@@ -1,22 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using SocialAnimal.Core.Domain;
 using SocialAnimal.Core.Repositories;
 
 namespace SocialAnimal.Infrastructure.Db.Entities;
 
-[Index(nameof(Email), IsUnique = true)]
-[Index(nameof(Handle), IsUnique = true)]
-[Index(nameof(Reference), IsUnique = true)]
+[Index(nameof(Slug), IsUnique = true)]
+[Index(nameof(Phone))]
+[Index(nameof(DeletedAt))]
 public class User : BaseEntity, IInto<UserRecord>, IFrom<User, UserRecord>
 {
     [Required]
     [MaxLength(100)]
-    public required string Handle { get; set; } // URL-safe username
-    
-    [Required]
-    [MaxLength(255)]
-    public required string Email { get; set; }
+    public required string Slug { get; set; } // Opaque public identifier
     
     [Required]
     [MaxLength(100)]
@@ -27,18 +24,14 @@ public class User : BaseEntity, IInto<UserRecord>, IFrom<User, UserRecord>
     public required string LastName { get; set; }
     
     [Required]
-    [MaxLength(50)]
-    public required string Reference { get; set; } // External ID like "user_abc123"
+    [MaxLength(20)]
+    [RegularExpression(@"^\+[1-9]\d{1,14}$", ErrorMessage = "Phone must be in E164 format")]
+    public required string Phone { get; set; } // E164 format
     
-    public string? PasswordHash { get; set; }
-    
-    public bool IsActive { get; set; } = true;
-    
-    public bool IsEmailVerified { get; set; } = false;
+    public Instant? DeletedAt { get; set; }
     
     // Navigation properties
-    public virtual ICollection<Event> OrganizedEvents { get; set; } = new List<Event>();
-    public virtual ICollection<EventAttendance> EventAttendances { get; set; } = new List<EventAttendance>();
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     
     // Mapping implementations
     public UserRecord Into()
@@ -46,14 +39,11 @@ public class User : BaseEntity, IInto<UserRecord>, IFrom<User, UserRecord>
         return new UserRecord
         {
             Id = Id,
-            Handle = Handle,
-            Email = Email,
+            Slug = Slug,
             FirstName = FirstName,
             LastName = LastName,
-            Reference = Reference,
-            PasswordHash = PasswordHash,
-            IsActive = IsActive,
-            IsEmailVerified = IsEmailVerified,
+            Phone = Phone,
+            DeletedAt = DeletedAt,
             CreatedOn = CreatedOn,
             UpdatedOn = UpdatedOn,
             ConcurrencyToken = ConcurrencyToken
@@ -70,14 +60,11 @@ public class User : BaseEntity, IInto<UserRecord>, IFrom<User, UserRecord>
         return new User
         {
             Id = record.Id,
-            Handle = record.Handle,
-            Email = record.Email,
+            Slug = record.Slug,
             FirstName = record.FirstName,
             LastName = record.LastName,
-            Reference = record.Reference,
-            PasswordHash = record.PasswordHash,
-            IsActive = record.IsActive,
-            IsEmailVerified = record.IsEmailVerified,
+            Phone = record.Phone,
+            DeletedAt = record.DeletedAt,
             CreatedOn = record.CreatedOn,
             UpdatedOn = record.UpdatedOn ?? record.CreatedOn,
             ConcurrencyToken = record.ConcurrencyToken

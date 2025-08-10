@@ -2,11 +2,12 @@ using SocialAnimal.Core.Domain;
 
 namespace SocialAnimal.Core.Repositories;
 
-public interface IUserRepo : ICrudRepo
+public interface IUserRepo
 {
     ICrudQueries<UserRecord> Users { get; }
-    Task<UserRecord?> FindByEmailAsync(string email);
-    Task<UserRecord?> FindByHandleAsync(string handle);
-    Task<bool> IsEmailUniqueAsync(string email, long? excludeUserId = null);
-    Task<bool> IsHandleUniqueAsync(string handle, long? excludeUserId = null);
+    Task<UserRecord?> GetBySlugAsync(string slug);
+    Task<UserRecord?> GetByPhoneAsync(string phone);
+    Task<bool> SlugExistsAsync(string slug);
+    Task<IEnumerable<UserRecord>> GetActiveUsersAsync(int skip = 0, int take = 20);
+    Task<IEnumerable<UserRecord>> GetDeletedUsersAsync(int skip = 0, int take = 20);
 }

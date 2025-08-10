@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using SocialAnimal.Core.Domain;
 using SocialAnimal.Core.Repositories;
 using SocialAnimal.Infrastructure.Db.Context;
@@ -7,60 +6,65 @@ using SocialAnimal.Infrastructure.Db.Entities;
 
 namespace SocialAnimal.Infrastructure.Repositories;
 
-public class UserRepo : CrudRepo, IUserRepo
+public class UserRepo : IUserRepo
 {
-    private readonly ApplicationContext _context;
+    private readonly Func<ApplicationContext> _unitOfWork;
     
-    public UserRepo(ApplicationContext context, IClock clock) : base(context, clock)
+    public UserRepo(Func<ApplicationContext> unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         Users = new CrudQueries<ApplicationContext, User, UserRecord>(
-            () => _context,
-            ctx => ctx.Users
-        );
+            unitOfWork, c => c.Users);
     }
     
     public ICrudQueries<UserRecord> Users { get; }
     
-    public async Task<UserRecord?> FindByEmailAsync(string email)
+    public async Task<UserRecord?> GetBySlugAsync(string slug)
     {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email);
-        
+        using var context = _unitOfWork();
+        var user = await context.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Slug == slug);
         return user?.Into();
     }
     
-    public async Task<UserRecord?> FindByHandleAsync(string handle)
+    public async Task<UserRecord?> GetByPhoneAsync(string phone)
     {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Handle == handle);
-        
+        using var context = _unitOfWork();
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Phone == phone);
         return user?.Into();
     }
     
-    public async Task<bool> IsEmailUniqueAsync(string email, long? excludeUserId = null)
+    public async Task<bool> SlugExistsAsync(string slug)
     {
-        var query = _context.Users.Where(u => u.Email == email);
-        
-        if (excludeUserId.HasValue)
-        {
-            query = query.Where(u => u.Id != excludeUserId.Value);
-        }
-        
-        return !await query.AnyAsync();
+        using var context = _unitOfWork();
+        return await context.Users
+            .IgnoreQueryFilters()
+            .AnyAsync(u => u.Slug == slug);
     }
     
-    public async Task<bool> IsHandleUniqueAsync(string handle, long? excludeUserId = null)
+    public async Task<IEnumerable<UserRecord>> GetActiveUsersAsync(int skip = 0, int take = 20)
     {
-        var query = _context.Users.Where(u => u.Handle == handle);
-        
-        if (excludeUserId.HasValue)
-        {
-            query = query.Where(u => u.Id != excludeUserId.Value);
-        }
-        
-        return !await query.AnyAsync();
+        using var context = _unitOfWork();
+        var users = await context.Users
+            .OrderByDescending(u => u.CreatedOn)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+        return users.Select(u => u.Into());
+    }
+    
+    public async Task<IEnumerable<UserRecord>> GetDeletedUsersAsync(int skip = 0, int take = 20)
+    {
+        using var context = _unitOfWork();
+        var users = await context.Users
+            .IgnoreQueryFilters()
+            .Where(u => u.DeletedAt != null)
+            .OrderByDescending(u => u.DeletedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+        return users.Select(u => u.Into());
     }
 }

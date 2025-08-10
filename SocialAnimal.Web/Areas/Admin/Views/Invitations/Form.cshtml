@@ -1,0 +1,250 @@
+@model InvitationFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Create Invitation" : "Edit Invitation";
+}
+
+<div class="form-page">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/invitations">Invitations</a> /
+            <span>@ViewData["Title"]</span>
+        </div>
+        
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="invitation-form"
+              hx-post="@(Model.IsNew ? "/admin/invitations/create" : $"/admin/invitations/{Model.Invitation.Id}/edit")"
+              hx-target="#form-result"
+              hx-swap="innerHTML"
+              hx-indicator="#form-loading">
+              
+            @Html.AntiForgeryToken()
+            
+            <!-- Hidden fields -->
+            @if(!Model.IsNew)
+            {
+                <input type="hidden" asp-for="Invitation.Id" />
+            }
+            
+            <!-- Form Errors Container -->
+            <div id="form-result"></div>
+            
+            <!-- Guest Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Guest Information</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Invitation.GuestName" class="required">
+                        Guest Name
+                    </label>
+                    <input asp-for="Invitation.GuestName" 
+                           class="form-control"
+                           placeholder="John Doe"
+                           autofocus />
+                    <span asp-validation-for="Invitation.GuestName" class="field-error"></span>
+                    <small class="form-text">
+                        The name of the person being invited
+                    </small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="Invitation.Email">
+                            Email Address
+                        </label>
+                        <input asp-for="Invitation.Email" 
+                               type="email"
+                               class="form-control"
+                               placeholder="john@example.com" />
+                        <span asp-validation-for="Invitation.Email" class="field-error"></span>
+                    </div>
+                    
+                    <div class="form-group col-md-6">
+                        <label asp-for="Invitation.Phone">
+                            Phone Number
+                        </label>
+                        <input asp-for="Invitation.Phone" 
+                               type="tel"
+                               class="form-control"
+                               placeholder="+1 (555) 123-4567"
+                               data-mask="+1 (000) 000-0000" />
+                        <span asp-validation-for="Invitation.Phone" class="field-error"></span>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" id="contact-requirement">
+                    <i class="fas fa-info-circle"></i>
+                    Please provide either an email address or phone number for the guest.
+                </div>
+            </div>
+            
+            <!-- Event Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Event Details</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Invitation.EventId" class="required">
+                        Event
+                    </label>
+                    <select asp-for="Invitation.EventId" 
+                            asp-items="Model.EventOptions"
+                            class="form-control">
+                        <option value="">Select Event</option>
+                    </select>
+                    <span asp-validation-for="Invitation.EventId" class="field-error"></span>
+                    <small class="form-text">
+                        Choose the event for this invitation
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Invitation.MaxPartySize" class="required">
+                        Maximum Party Size
+                    </label>
+                    <input asp-for="Invitation.MaxPartySize" 
+                           type="number"
+                           min="1"
+                           max="20"
+                           class="form-control"
+                           placeholder="2" />
+                    <span asp-validation-for="Invitation.MaxPartySize" class="field-error"></span>
+                    <small class="form-text">
+                        Maximum number of people this invitation covers (including the guest)
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Sending Options Section -->
+            @if(Model.IsNew)
+            {
+                <div class="form-section">
+                    <h2 class="form-section-title">Sending Options</h2>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input asp-for="Invitation.SendImmediately" 
+                                   type="checkbox"
+                                   value="true">
+                            Send invitation immediately after creation
+                        </label>
+                        <small class="form-text">
+                            If checked, the invitation will be sent as soon as it's created. 
+                            Otherwise, you can send it later from the invitations list.
+                        </small>
+                    </div>
+                </div>
+            }
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        @(Model.IsNew ? "Create Invitation" : "Save Changes")
+                    </button>
+                    
+                    @if(Model.IsNew)
+                    {
+                        <button type="submit" 
+                                class="btn btn-secondary"
+                                name="createAndContinue"
+                                value="true">
+                            Save & Add Another
+                        </button>
+                    }
+                    
+                    <a href="@(Model.IsNew ? "/admin/invitations" : $"/admin/invitations/{Model.Invitation.Id}")" 
+                       class="btn btn-link">
+                        Cancel
+                    </a>
+                </div>
+                
+                <div class="form-actions-right">
+                    <span class="auto-save-status" id="auto-save-status" style="display:none;">
+                        <i class="fas fa-check"></i> Draft saved
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="form-loading" class="form-loading" style="display:none;">
+                <div class="spinner-border"></div>
+                Saving...
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Phone number formatting
+    const phoneInput = document.querySelector('[data-mask]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    value = `+1 (${value}`;
+                } else if (value.length <= 6) {
+                    value = `+1 (${value.slice(0, 3)}) ${value.slice(3)}`;
+                } else {
+                    value = `+1 (${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                }
+            }
+            
+            e.target.value = value;
+        });
+    }
+    
+    // Contact validation
+    const emailInput = document.querySelector('input[name="Invitation.Email"]');
+    const phoneInput2 = document.querySelector('input[name="Invitation.Phone"]');
+    const contactRequirement = document.getElementById('contact-requirement');
+    
+    function validateContact() {
+        const hasEmail = emailInput.value.trim().length > 0;
+        const hasPhone = phoneInput2.value.trim().length > 0;
+        
+        if (hasEmail || hasPhone) {
+            contactRequirement.style.display = 'none';
+        } else {
+            contactRequirement.style.display = 'block';
+        }
+    }
+    
+    emailInput.addEventListener('input', validateContact);
+    phoneInput2.addEventListener('input', validateContact);
+    
+    // Initial validation
+    validateContact();
+    
+    // Form change tracking
+    let formChanged = false;
+    const form = document.getElementById('invitation-form');
+    
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+    
+    // Warn on navigation if unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+    
+    // Clear warning on successful submit
+    form.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            formChanged = false;
+        }
+    });
+});
+</script>

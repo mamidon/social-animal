@@ -1,0 +1,352 @@
+@model InvitationDetailsViewModel
+@{
+    ViewData["Title"] = $"Invitation for {Model.GuestName}";
+}
+
+<div class="detail-page">
+    <!-- Page Header -->
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/invitations">Invitations</a> /
+            <span>@Model.GuestName</span>
+        </div>
+        
+        <div class="detail-title-row">
+            <h1>Invitation for @Model.GuestName</h1>
+            
+            <div class="detail-actions">
+                <a href="/admin/invitations/@Model.Invitation.Slug/edit" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                @if(!Model.IsSent)
+                {
+                    <button class="btn btn-success"
+                            hx-post="/admin/invitations/@Model.Invitation.Id/send"
+                            hx-confirm="Send this invitation?">
+                        <i class="fas fa-envelope"></i> Send
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-info"
+                            hx-post="/admin/invitations/@Model.Invitation.Id/resend"
+                            hx-confirm="Resend this invitation?">
+                        <i class="fas fa-redo"></i> Resend
+                    </button>
+                }
+                <button class="btn btn-danger"
+                        hx-delete="/admin/invitations/@Model.Invitation.Id"
+                        hx-confirm="Delete this invitation?">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        
+        <!-- Status Badges -->
+        <div class="status-badges">
+            @if(Model.Invitation.IsDeleted)
+            {
+                <span class="badge badge-danger">Deleted</span>
+            }
+            else if(Model.IsSent)
+            {
+                <span class="badge badge-success">Sent</span>
+            }
+            else
+            {
+                <span class="badge badge-warning">Pending</span>
+            }
+            
+            @if(Model.HasResponse)
+            {
+                @if(Model.Reservation!.PartySize > 0)
+                {
+                    <span class="badge badge-info">
+                        Attending (@Model.Reservation.PartySize)
+                    </span>
+                }
+                else
+                {
+                    <span class="badge badge-secondary">Regrets</span>
+                }
+            }
+            else
+            {
+                <span class="badge badge-light">No Response</span>
+            }
+        </div>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="detail-content">
+        <!-- Left Column - Main Info -->
+        <div class="detail-main">
+            <!-- Guest Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Guest Information</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Name</dt>
+                        <dd>@Model.GuestName</dd>
+                        
+                        @if(!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <dt>Email</dt>
+                            <dd>
+                                <a href="mailto:@Model.Email">@Model.Email</a>
+                            </dd>
+                        }
+                        
+                        @if(!string.IsNullOrEmpty(Model.Phone))
+                        {
+                            <dt>Phone</dt>
+                            <dd>
+                                <a href="tel:@Model.Phone">@Model.Phone</a>
+                            </dd>
+                        }
+                        
+                        <dt>Maximum Party Size</dt>
+                        <dd>@Model.MaxPartySize people</dd>
+                        
+                        <dt>Invitation Slug</dt>
+                        <dd>
+                            <code>@Model.Invitation.Slug</code>
+                            <button class="btn-icon btn-sm"
+                                    onclick="copyToClipboard('@Model.Invitation.Slug')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Event Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Event Information</h2>
+                </div>
+                <div class="card-body">
+                    @if(Model.Event != null)
+                    {
+                        <dl class="detail-list">
+                            <dt>Event Title</dt>
+                            <dd>
+                                <a href="/admin/events/@Model.Event.Slug">
+                                    @Model.Event.Title
+                                </a>
+                            </dd>
+                            
+                            <dt>Location</dt>
+                            <dd>@Model.Event.FullAddress</dd>
+                            
+                            <dt>Event Created</dt>
+                            <dd>
+                                <time datetime="@Model.Event.CreatedOn">
+                                    @Model.Event.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy")
+                                </time>
+                            </dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Event information not available</p>
+                    }
+                </div>
+            </div>
+            
+            <!-- RSVP Response Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>RSVP Response</h2>
+                </div>
+                <div class="card-body">
+                    @if(Model.HasResponse && Model.Reservation != null)
+                    {
+                        <dl class="detail-list">
+                            <dt>Response Status</dt>
+                            <dd>
+                                @if(Model.Reservation.PartySize > 0)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check"></i> Attending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">
+                                        <i class="fas fa-times"></i> Cannot Attend (Regrets)
+                                    </span>
+                                }
+                            </dd>
+                            
+                            <dt>Party Size</dt>
+                            <dd>@Model.Reservation.PartySize people</dd>
+                            
+                            <dt>Response Date</dt>
+                            <dd>
+                                <time datetime="@Model.Statistics.ResponseDate">
+                                    @Model.Statistics.ResponseDate?.ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            </dd>
+                            
+                            <dt>Reservation ID</dt>
+                            <dd>
+                                <a href="/admin/reservations/@Model.Reservation.Id">
+                                    #@Model.Reservation.Id
+                                </a>
+                            </dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="empty-state-small">
+                            <i class="fas fa-clock"></i>
+                            <p>No RSVP response yet</p>
+                            <small class="text-muted">
+                                The guest hasn't responded to this invitation yet.
+                            </small>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Timeline Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Timeline</h2>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Invitation Created</h4>
+                                <time datetime="@Model.Invitation.CreatedOn">
+                                    @Model.Invitation.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            </div>
+                        </div>
+                        
+                        @if(Model.IsSent && Model.SentAt.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker sent">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Invitation Sent</h4>
+                                    <time datetime="@Model.SentAt">
+                                        @Model.SentAt?.ToString("MMMM dd, yyyy h:mm tt")
+                                    </time>
+                                    @if(Model.Statistics.TimesSent > 1)
+                                    {
+                                        <small class="text-muted">(Sent @Model.Statistics.TimesSent times)</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        
+                        @if(Model.HasResponse)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker response">
+                                    <i class="fas fa-reply"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Response Received</h4>
+                                    <time datetime="@Model.Statistics.ResponseDate">
+                                        @Model.Statistics.ResponseDate?.ToString("MMMM dd, yyyy h:mm tt")
+                                    </time>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Actions & Stats -->
+        <div class="detail-sidebar">
+            <!-- Quick Actions Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-list">
+                        @if(Model.HasContact)
+                        {
+                            @if(!string.IsNullOrEmpty(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email" class="action-item">
+                                    <i class="fas fa-envelope"></i>
+                                    Send Email
+                                </a>
+                            }
+                            @if(!string.IsNullOrEmpty(Model.Phone))
+                            {
+                                <a href="tel:@Model.Phone" class="action-item">
+                                    <i class="fas fa-phone"></i>
+                                    Call Guest
+                                </a>
+                            }
+                        }
+                        
+                        @if(!Model.HasResponse)
+                        {
+                            <a href="/admin/reservations/create?invitationId=@Model.Invitation.Id" 
+                               class="action-item">
+                                <i class="fas fa-plus"></i>
+                                Add Manual RSVP
+                            </a>
+                        }
+                        
+                        <button class="action-item"
+                                onclick="duplicateInvitation(@Model.Invitation.Id)">
+                            <i class="fas fa-copy"></i>
+                            Duplicate Invitation
+                        </button>
+                        
+                        <button class="action-item"
+                                onclick="exportInvitationData(@Model.Invitation.Id)">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show temporary success message
+        const button = event.target.closest('button');
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        
+        icon.className = 'fas fa-check';
+        setTimeout(() => {
+            icon.className = originalClass;
+        }, 1000);
+    });
+}
+
+function duplicateInvitation(invitationId) {
+    if (confirm('Create a copy of this invitation?')) {
+        window.location.href = `/admin/invitations/create?duplicateFrom=${invitationId}`;
+    }
+}
+
+function exportInvitationData(invitationId) {
+    window.location.href = `/admin/invitations/${invitationId}/export`;
+}
+</script>

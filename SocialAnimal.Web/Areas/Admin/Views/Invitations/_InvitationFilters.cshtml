@@ -1,0 +1,68 @@
+@model InvitationListFilters
+
+<form id="filter-form" 
+      hx-get="/admin/invitations/list-partial"
+      hx-target="#invitation-list"
+      hx-trigger="change">
+    
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" 
+               name="search" 
+               value="@Model.Search"
+               placeholder="Guest name or contact..."
+               hx-get="/admin/invitations/list-partial"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#invitation-list"
+               hx-include="#filter-form">
+    </div>
+    
+    <div class="filter-group">
+        <label>Event</label>
+        <select name="eventId" id="event-filter">
+            <option value="">All Events</option>
+            @* Event options would be populated from the controller *@
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Send Status</label>
+        <select name="isSent">
+            <option value="">All</option>
+            <option value="true" @(Model.IsSent == true ? "selected" : "")>Sent</option>
+            <option value="false" @(Model.IsSent == false ? "selected" : "")>Not Sent</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>Response Status</label>
+        <select name="hasResponse">
+            <option value="">All</option>
+            <option value="true" @(Model.HasResponse == true ? "selected" : "")>Has Response</option>
+            <option value="false" @(Model.HasResponse == false ? "selected" : "")>No Response</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>
+            <input type="checkbox" 
+                   name="includeDeleted" 
+                   value="true"
+                   @(Model.IncludeDeleted ? "checked" : "")>
+            Include Deleted
+        </label>
+    </div>
+    
+    <button type="button" 
+            onclick="clearFilters()"
+            class="btn btn-link">
+        Clear Filters
+    </button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    htmx.trigger('#filter-form', 'submit');
+}
+</script>

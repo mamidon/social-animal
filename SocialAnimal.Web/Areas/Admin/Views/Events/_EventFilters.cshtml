@@ -1,0 +1,141 @@
+@model EventListFilters
+
+<form id="filter-form" 
+      hx-get="/admin/events/list-partial"
+      hx-target="#event-list"
+      hx-trigger="change">
+    
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" 
+               name="search" 
+               value="@Model.Search"
+               placeholder="Event title or location..."
+               hx-get="/admin/events/list-partial"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#event-list"
+               hx-include="#filter-form">
+    </div>
+    
+    <div class="filter-group">
+        <label>State</label>
+        <select name="state" 
+                id="state-filter"
+                hx-get="/admin/events/cities"
+                hx-trigger="change"
+                hx-target="#city-filter">
+            <option value="">All States</option>
+            <option value="AL" @(Model.State == "AL" ? "selected" : "")>Alabama</option>
+            <option value="AK" @(Model.State == "AK" ? "selected" : "")>Alaska</option>
+            <option value="AZ" @(Model.State == "AZ" ? "selected" : "")>Arizona</option>
+            <option value="AR" @(Model.State == "AR" ? "selected" : "")>Arkansas</option>
+            <option value="CA" @(Model.State == "CA" ? "selected" : "")>California</option>
+            <option value="CO" @(Model.State == "CO" ? "selected" : "")>Colorado</option>
+            <option value="CT" @(Model.State == "CT" ? "selected" : "")>Connecticut</option>
+            <option value="DE" @(Model.State == "DE" ? "selected" : "")>Delaware</option>
+            <option value="FL" @(Model.State == "FL" ? "selected" : "")>Florida</option>
+            <option value="GA" @(Model.State == "GA" ? "selected" : "")>Georgia</option>
+            <option value="HI" @(Model.State == "HI" ? "selected" : "")>Hawaii</option>
+            <option value="ID" @(Model.State == "ID" ? "selected" : "")>Idaho</option>
+            <option value="IL" @(Model.State == "IL" ? "selected" : "")>Illinois</option>
+            <option value="IN" @(Model.State == "IN" ? "selected" : "")>Indiana</option>
+            <option value="IA" @(Model.State == "IA" ? "selected" : "")>Iowa</option>
+            <option value="KS" @(Model.State == "KS" ? "selected" : "")>Kansas</option>
+            <option value="KY" @(Model.State == "KY" ? "selected" : "")>Kentucky</option>
+            <option value="LA" @(Model.State == "LA" ? "selected" : "")>Louisiana</option>
+            <option value="ME" @(Model.State == "ME" ? "selected" : "")>Maine</option>
+            <option value="MD" @(Model.State == "MD" ? "selected" : "")>Maryland</option>
+            <option value="MA" @(Model.State == "MA" ? "selected" : "")>Massachusetts</option>
+            <option value="MI" @(Model.State == "MI" ? "selected" : "")>Michigan</option>
+            <option value="MN" @(Model.State == "MN" ? "selected" : "")>Minnesota</option>
+            <option value="MS" @(Model.State == "MS" ? "selected" : "")>Mississippi</option>
+            <option value="MO" @(Model.State == "MO" ? "selected" : "")>Missouri</option>
+            <option value="MT" @(Model.State == "MT" ? "selected" : "")>Montana</option>
+            <option value="NE" @(Model.State == "NE" ? "selected" : "")>Nebraska</option>
+            <option value="NV" @(Model.State == "NV" ? "selected" : "")>Nevada</option>
+            <option value="NH" @(Model.State == "NH" ? "selected" : "")>New Hampshire</option>
+            <option value="NJ" @(Model.State == "NJ" ? "selected" : "")>New Jersey</option>
+            <option value="NM" @(Model.State == "NM" ? "selected" : "")>New Mexico</option>
+            <option value="NY" @(Model.State == "NY" ? "selected" : "")>New York</option>
+            <option value="NC" @(Model.State == "NC" ? "selected" : "")>North Carolina</option>
+            <option value="ND" @(Model.State == "ND" ? "selected" : "")>North Dakota</option>
+            <option value="OH" @(Model.State == "OH" ? "selected" : "")>Ohio</option>
+            <option value="OK" @(Model.State == "OK" ? "selected" : "")>Oklahoma</option>
+            <option value="OR" @(Model.State == "OR" ? "selected" : "")>Oregon</option>
+            <option value="PA" @(Model.State == "PA" ? "selected" : "")>Pennsylvania</option>
+            <option value="RI" @(Model.State == "RI" ? "selected" : "")>Rhode Island</option>
+            <option value="SC" @(Model.State == "SC" ? "selected" : "")>South Carolina</option>
+            <option value="SD" @(Model.State == "SD" ? "selected" : "")>South Dakota</option>
+            <option value="TN" @(Model.State == "TN" ? "selected" : "")>Tennessee</option>
+            <option value="TX" @(Model.State == "TX" ? "selected" : "")>Texas</option>
+            <option value="UT" @(Model.State == "UT" ? "selected" : "")>Utah</option>
+            <option value="VT" @(Model.State == "VT" ? "selected" : "")>Vermont</option>
+            <option value="VA" @(Model.State == "VA" ? "selected" : "")>Virginia</option>
+            <option value="WA" @(Model.State == "WA" ? "selected" : "")>Washington</option>
+            <option value="WV" @(Model.State == "WV" ? "selected" : "")>West Virginia</option>
+            <option value="WI" @(Model.State == "WI" ? "selected" : "")>Wisconsin</option>
+            <option value="WY" @(Model.State == "WY" ? "selected" : "")>Wyoming</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>City</label>
+        <select name="city" id="city-filter">
+            <option value="">All Cities</option>
+            @if(!string.IsNullOrEmpty(Model.City))
+            {
+                <option value="@Model.City" selected>@Model.City</option>
+            }
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>
+            <input type="checkbox" 
+                   name="includeDeleted" 
+                   value="true"
+                   @(Model.IncludeDeleted ? "checked" : "")>
+            Include Deleted
+        </label>
+    </div>
+    
+    <button type="button" 
+            onclick="clearFilters()"
+            class="btn btn-link">
+        Clear Filters
+    </button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    document.getElementById('city-filter').innerHTML = '<option value="">All Cities</option>';
+    htmx.trigger('#filter-form', 'submit');
+}
+
+// Update cities when state changes
+document.getElementById('state-filter').addEventListener('change', function() {
+    const state = this.value;
+    const citySelect = document.getElementById('city-filter');
+    
+    if (state) {
+        fetch(`/admin/events/cities?state=${state}`)
+            .then(response => response.json())
+            .then(cities => {
+                citySelect.innerHTML = '<option value="">All Cities</option>';
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.value;
+                    option.textContent = city.text;
+                    citySelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching cities:', error);
+                citySelect.innerHTML = '<option value="">All Cities</option>';
+            });
+    } else {
+        citySelect.innerHTML = '<option value="">All Cities</option>';
+    }
+});
+</script>

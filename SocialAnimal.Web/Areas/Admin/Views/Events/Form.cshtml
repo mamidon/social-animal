@@ -1,0 +1,248 @@
+@model EventFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Create Event" : "Edit Event";
+}
+
+<div class="form-page">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/events">Events</a> /
+            <span>@ViewData["Title"]</span>
+        </div>
+        
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="event-form"
+              hx-post="@(Model.IsNew ? "/admin/events/create" : $"/admin/events/{Model.Event.Id}/edit")"
+              hx-target="#form-result"
+              hx-swap="innerHTML"
+              hx-indicator="#form-loading">
+              
+            @Html.AntiForgeryToken()
+            
+            <!-- Hidden fields -->
+            @if(!Model.IsNew)
+            {
+                <input type="hidden" asp-for="Event.Id" />
+            }
+            
+            <!-- Form Errors Container -->
+            <div id="form-result"></div>
+            
+            <!-- Event Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Event Information</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Event.Title" class="required">
+                        Event Title
+                    </label>
+                    <input asp-for="Event.Title" 
+                           class="form-control"
+                           placeholder="Summer BBQ 2024"
+                           autofocus />
+                    <span asp-validation-for="Event.Title" class="field-error"></span>
+                    <small class="form-text">
+                        A descriptive title for your event
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Location Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Location</h2>
+                
+                <div class="form-group">
+                    <label asp-for="Event.AddressLine1" class="required">
+                        Address Line 1
+                    </label>
+                    <input asp-for="Event.AddressLine1" 
+                           class="form-control"
+                           placeholder="123 Main Street" />
+                    <span asp-validation-for="Event.AddressLine1" class="field-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Event.AddressLine2">
+                        Address Line 2
+                    </label>
+                    <input asp-for="Event.AddressLine2" 
+                           class="form-control"
+                           placeholder="Apt, Suite, Floor (optional)" />
+                    <span asp-validation-for="Event.AddressLine2" class="field-error"></span>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="Event.City" class="required">
+                            City
+                        </label>
+                        <input asp-for="Event.City" 
+                               class="form-control"
+                               placeholder="Seattle" />
+                        <span asp-validation-for="Event.City" class="field-error"></span>
+                    </div>
+                    
+                    <div class="form-group col-md-3">
+                        <label asp-for="Event.State" class="required">
+                            State
+                        </label>
+                        <select asp-for="Event.State" 
+                                asp-items="Model.StateOptions"
+                                class="form-control">
+                            <option value="">Select State</option>
+                        </select>
+                        <span asp-validation-for="Event.State" class="field-error"></span>
+                    </div>
+                    
+                    <div class="form-group col-md-3">
+                        <label asp-for="Event.Postal" class="required">
+                            Postal Code
+                        </label>
+                        <input asp-for="Event.Postal" 
+                               class="form-control"
+                               placeholder="98101"
+                               pattern="^\d{5}(-\d{4})?$" />
+                        <span asp-validation-for="Event.Postal" class="field-error"></span>
+                        <small class="form-text">5-digit ZIP code</small>
+                    </div>
+                </div>
+                
+                <!-- Address Validation -->
+                <div class="address-validation">
+                    <button type="button" 
+                            class="btn btn-link"
+                            onclick="validateAddress()">
+                        <i class="fas fa-map-marker-alt"></i> Validate Address
+                    </button>
+                    <div id="address-validation-result" class="mt-2"></div>
+                    
+                    <!-- Map Preview Placeholder -->
+                    <div class="map-preview-container mt-3" style="display:none;" id="map-preview">
+                        <div class="map-preview">
+                            <p class="text-muted">Map preview would appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        @(Model.IsNew ? "Create Event" : "Save Changes")
+                    </button>
+                    
+                    @if(Model.IsNew)
+                    {
+                        <button type="submit" 
+                                class="btn btn-secondary"
+                                name="createAndContinue"
+                                value="true">
+                            Save & Add Another
+                        </button>
+                    }
+                    
+                    <a href="@(Model.IsNew ? "/admin/events" : $"/admin/events/{Model.Event.Id}")" 
+                       class="btn btn-link">
+                        Cancel
+                    </a>
+                </div>
+                
+                <div class="form-actions-right">
+                    <span class="auto-save-status" id="auto-save-status" style="display:none;">
+                        <i class="fas fa-check"></i> Draft saved
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="form-loading" class="form-loading" style="display:none;">
+                <div class="spinner-border"></div>
+                Saving...
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Postal code formatting
+    const postalInput = document.querySelector('input[name="Event.Postal"]');
+    if (postalInput) {
+        postalInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 5) {
+                value = value.slice(0, 5) + '-' + value.slice(5, 9);
+            }
+            
+            e.target.value = value;
+        });
+    }
+    
+    // Form change tracking
+    let formChanged = false;
+    const form = document.getElementById('event-form');
+    
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+    
+    // Warn on navigation if unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+    
+    // Clear warning on successful submit
+    form.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            formChanged = false;
+        }
+    });
+});
+
+function validateAddress() {
+    const formData = {
+        title: document.querySelector('input[name="Event.Title"]').value,
+        addressLine1: document.querySelector('input[name="Event.AddressLine1"]').value,
+        addressLine2: document.querySelector('input[name="Event.AddressLine2"]').value,
+        city: document.querySelector('input[name="Event.City"]').value,
+        state: document.querySelector('select[name="Event.State"]').value,
+        postal: document.querySelector('input[name="Event.Postal"]').value
+    };
+    
+    const resultDiv = document.getElementById('address-validation-result');
+    resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating address...';
+    
+    fetch('/admin/events/validate-address', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.valid) {
+            resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check"></i> Address is valid</div>';
+            document.getElementById('map-preview').style.display = 'block';
+        } else {
+            resultDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Address could not be validated</div>';
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times"></i> Error validating address</div>';
+        console.error('Error:', error);
+    });
+}
+</script>

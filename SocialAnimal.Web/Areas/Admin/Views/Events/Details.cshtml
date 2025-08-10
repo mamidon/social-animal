@@ -1,0 +1,370 @@
+@model EventDetailsViewModel
+@{
+    ViewData["Title"] = Model.Event.Title;
+}
+
+<div class="detail-page">
+    <!-- Page Header -->
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a> /
+            <a href="/admin/events">Events</a> /
+            <span>@Model.Event.Title</span>
+        </div>
+        
+        <div class="detail-title-row">
+            <h1>@Model.Event.Title</h1>
+            
+            <div class="detail-actions">
+                <a href="/admin/events/@Model.Event.Slug/edit" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                @if(Model.Event.IsDeleted)
+                {
+                    <button class="btn btn-success"
+                            hx-post="/admin/events/@Model.Event.Id/restore"
+                            hx-confirm="Restore this event?">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-danger"
+                            hx-delete="/admin/events/@Model.Event.Id"
+                            hx-confirm="Delete this event?">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <!-- Status Badges -->
+        <div class="status-badges">
+            @if(Model.Event.IsDeleted)
+            {
+                <span class="badge badge-danger">Deleted</span>
+            }
+            else
+            {
+                <span class="badge badge-success">Active</span>
+            }
+            
+            <span class="badge badge-info">
+                @Model.Statistics.ConfirmedAttendees attendees
+            </span>
+            
+            <span class="badge badge-secondary">
+                @Model.Statistics.TotalInvitations invitations
+            </span>
+        </div>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="detail-content">
+        <!-- Left Column - Main Info -->
+        <div class="detail-main">
+            <!-- Event Information Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Event Information</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Title</dt>
+                        <dd>@Model.Event.Title</dd>
+                        
+                        <dt>Slug</dt>
+                        <dd>
+                            <code>@Model.Event.Slug</code>
+                            <button class="btn-icon btn-sm"
+                                    onclick="copyToClipboard('@Model.Event.Slug')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </dd>
+                        
+                        <dt>Created</dt>
+                        <dd>
+                            <time datetime="@Model.Event.CreatedOn">
+                                @Model.Event.CreatedOn.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                            </time>
+                        </dd>
+                        
+                        <dt>Last Modified</dt>
+                        <dd>
+                            @if(Model.Event.UpdatedOn.HasValue)
+                            {
+                                <time datetime="@Model.Event.UpdatedOn">
+                                    @Model.Event.UpdatedOn.Value.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never</span>
+                            }
+                        </dd>
+                        
+                        @if(Model.Event.IsDeleted)
+                        {
+                            <dt>Deleted</dt>
+                            <dd>
+                                <time datetime="@Model.Event.DeletedAt">
+                                    @Model.Event.DeletedAt.Value.ToDateTimeOffset().ToString("MMMM dd, yyyy h:mm tt")
+                                </time>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Location Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Location</h2>
+                </div>
+                <div class="card-body">
+                    <address class="event-address">
+                        <div>@Model.Event.AddressLine1</div>
+                        @if(!string.IsNullOrEmpty(Model.Event.AddressLine2))
+                        {
+                            <div>@Model.Event.AddressLine2</div>
+                        }
+                        <div>
+                            @Model.Event.City, @Model.Event.State @Model.Event.Postal
+                        </div>
+                    </address>
+                    
+                    <div class="location-actions mt-3">
+                        <a href="https://maps.google.com/?q=@Uri.EscapeDataString(Model.Event.FullAddress)" 
+                           target="_blank" 
+                           class="btn btn-link">
+                            <i class="fas fa-map-marker-alt"></i> View on Google Maps
+                        </a>
+                        <button class="btn btn-link"
+                                onclick="copyToClipboard('@Model.Event.FullAddress')">
+                            <i class="fas fa-copy"></i> Copy Address
+                        </button>
+                    </div>
+                    
+                    <div class="map-preview mt-3">
+                        <!-- Placeholder for map -->
+                        <div class="map-placeholder">
+                            <p class="text-muted">
+                                <i class="fas fa-map"></i>
+                                Interactive map would appear here
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Invitations Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Invitations (@Model.Statistics.TotalInvitations)</h2>
+                    <div class="card-actions">
+                        <a href="/admin/invitations/create?eventId=@Model.Event.Id" 
+                           class="btn btn-sm btn-primary">
+                            Add Invitation
+                        </a>
+                        <a href="/admin/invitations?eventId=@Model.Event.Id" 
+                           class="btn btn-sm btn-secondary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if(Model.Invitations.Any())
+                    {
+                        <table class="compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Guest</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Response</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var invitation in Model.Invitations)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/invitations/@invitation.Slug">
+                                                @invitation.GuestName
+                                            </a>
+                                        </td>
+                                        <td class="text-muted">
+                                            @if(!string.IsNullOrEmpty(invitation.Email))
+                                            {
+                                                <span>@invitation.Email</span>
+                                            }
+                                            else if(!string.IsNullOrEmpty(invitation.Phone))
+                                            {
+                                                <span>@invitation.Phone</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if(invitation.IsSent)
+                                            {
+                                                <span class="badge badge-success">Sent</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning">Pending</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @* This would be populated from reservation data *@
+                                            <span class="text-muted">No response</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="action-buttons">
+                                                <button class="btn-icon btn-sm"
+                                                        title="Send Invitation">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+                                                <a href="/admin/invitations/@invitation.Slug/edit"
+                                                   class="btn-icon btn-sm"
+                                                   title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        
+                        @if(Model.Statistics.TotalInvitations > 10)
+                        {
+                            <div class="text-center mt-3">
+                                <a href="/admin/invitations?eventId=@Model.Event.Id" class="btn btn-link">
+                                    View all @Model.Statistics.TotalInvitations invitations
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state-small">
+                            <p>No invitations yet</p>
+                            <a href="/admin/invitations/create?eventId=@Model.Event.Id" 
+                               class="btn btn-sm btn-primary">
+                                Create First Invitation
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Statistics & Actions -->
+        <div class="detail-sidebar">
+            <!-- Statistics Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Statistics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.TotalInvitations</span>
+                            <span class="stat-label">Invitations</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.SentInvitations</span>
+                            <span class="stat-label">Sent</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.ConfirmedAttendees</span>
+                            <span class="stat-label">Attending</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.RegretCount</span>
+                            <span class="stat-label">Regrets</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.PendingResponses</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Statistics.ResponseRate.ToString("F1")%</span>
+                            <span class="stat-label">Response Rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-list">
+                        <a href="/admin/invitations/create?eventId=@Model.Event.Id" 
+                           class="action-item">
+                            <i class="fas fa-plus"></i>
+                            Create Invitation
+                        </a>
+                        <button class="action-item"
+                                onclick="sendAllInvitations(@Model.Event.Id)">
+                            <i class="fas fa-envelope"></i>
+                            Send All Invitations
+                        </button>
+                        <a href="/admin/reports/event/@Model.Event.Id" 
+                           class="action-item">
+                            <i class="fas fa-chart-bar"></i>
+                            View Report
+                        </a>
+                        <button class="action-item"
+                                onclick="exportGuestList(@Model.Event.Id)">
+                            <i class="fas fa-download"></i>
+                            Export Guest List
+                        </button>
+                        <button class="action-item"
+                                onclick="duplicateEvent(@Model.Event.Id)">
+                            <i class="fas fa-copy"></i>
+                            Duplicate Event
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show temporary success message
+        const button = event.target.closest('button');
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        
+        icon.className = 'fas fa-check';
+        setTimeout(() => {
+            icon.className = originalClass;
+        }, 1000);
+    });
+}
+
+function sendAllInvitations(eventId) {
+    if (confirm('Send all pending invitations for this event?')) {
+        // In a real app, this would make an API call
+        alert('Feature coming soon - Send all invitations');
+    }
+}
+
+function exportGuestList(eventId) {
+    window.location.href = `/admin/events/${eventId}/export-guest-list`;
+}
+
+function duplicateEvent(eventId) {
+    if (confirm('Create a copy of this event?')) {
+        window.location.href = `/admin/events/create?duplicateFrom=${eventId}`;
+    }
+}
+</script>

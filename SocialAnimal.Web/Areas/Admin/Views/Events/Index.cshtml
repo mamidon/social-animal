@@ -1,0 +1,142 @@
+@model EventListViewModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div class="page-header">
+    <h1>Events</h1>
+    <div class="page-actions">
+        <a href="/admin/events/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Event
+        </a>
+        <button onclick="exportList()" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export
+        </button>
+    </div>
+</div>
+
+<div class="list-container">
+    <!-- Filters Panel -->
+    <aside class="filters-panel" id="filters">
+        @await Html.PartialAsync("_EventFilters", Model.Filters)
+    </aside>
+    
+    <!-- Main List Area -->
+    <main class="list-content">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" 
+                   placeholder="Search events..."
+                   name="search"
+                   value="@Model.Filters.Search"
+                   hx-get="/admin/events/list-partial"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-target="#event-list"
+                   hx-include="#filters">
+        </div>
+        
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions" style="display:none;">
+            <span class="selected-count">0 selected</span>
+            <button onclick="bulkDelete()" class="btn btn-danger btn-sm">
+                Delete Selected
+            </button>
+            <button onclick="bulkExport()" class="btn btn-secondary btn-sm">
+                Export Selected
+            </button>
+        </div>
+        
+        <!-- Results Table -->
+        <div id="event-list">
+            @await Html.PartialAsync("_EventList", Model.Items)
+        </div>
+    </main>
+</div>
+
+<script>
+function exportList() {
+    const filters = new FormData(document.getElementById('filter-form'));
+    const params = new URLSearchParams(filters);
+    window.location.href = `/admin/events/export?${params}`;
+}
+
+function bulkDelete() {
+    const selected = Array.from(document.querySelectorAll('.row-select:checked'))
+        .map(cb => cb.value);
+        
+    if (selected.length === 0) {
+        alert('Please select events to delete');
+        return;
+    }
+        
+    if (confirm(`Delete ${selected.length} events?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/events/bulk-delete';
+        
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = token;
+        form.appendChild(tokenInput);
+        
+        selected.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function bulkExport() {
+    const selected = Array.from(document.querySelectorAll('.row-select:checked'))
+        .map(cb => cb.value);
+        
+    if (selected.length === 0) {
+        alert('Please select events to export');
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    selected.forEach(id => params.append('ids', id));
+    window.location.href = `/admin/events/export?${params}`;
+}
+
+// Bulk selection
+document.addEventListener('DOMContentLoaded', function() {
+    // Select all checkbox
+    const selectAll = document.getElementById('select-all');
+    selectAll?.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.row-select');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkActions();
+    });
+    
+    // Individual checkboxes
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-select')) {
+            updateBulkActions();
+        }
+    });
+});
+
+function updateBulkActions() {
+    const selected = document.querySelectorAll('.row-select:checked');
+    const bulkActions = document.querySelector('.bulk-actions');
+    const count = document.querySelector('.selected-count');
+    
+    if (selected.length > 0) {
+        bulkActions.style.display = 'flex';
+        count.textContent = `${selected.length} selected`;
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+</script>

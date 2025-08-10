@@ -10,15 +10,18 @@ namespace SocialAnimal.Web.Controllers;
 public class UsersController : BaseApiController
 {
     private readonly IUserRepo _userRepo;
+    private readonly ICrudRepo _crudRepo;
     private readonly ILoggerPortal _logger;
     private readonly IClockPortal _clock;
     
     public UsersController(
         IUserRepo userRepo,
+        ICrudRepo crudRepo,
         ILoggerPortal logger,
         IClockPortal clock)
     {
         _userRepo = userRepo;
+        _crudRepo = crudRepo;
         _logger = logger;
         _clock = clock;
     }
@@ -30,10 +33,10 @@ public class UsersController : BaseApiController
         return HandleResult(user);
     }
     
-    [HttpGet("handle/{handle}", Name = "GetUserByHandle")]
-    public async Task<IActionResult> GetByHandle(string handle)
+    [HttpGet("slug/{slug}", Name = "GetUserBySlug")]
+    public async Task<IActionResult> GetBySlug(string slug)
     {
-        var user = await _userRepo.FindByHandleAsync(handle);
+        var user = await _userRepo.GetBySlugAsync(slug);
         return HandleResult(user);
     }
     
@@ -42,14 +45,14 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> Register([FromBody] UserRegistrationStub stub)
     {
         // Validate uniqueness
-        if (!await _userRepo.IsEmailUniqueAsync(stub.Email))
+        if (await _userRepo.GetByPhoneAsync(stub.Phone) != null)
         {
-            ModelState.AddModelError(nameof(stub.Email), "Email is already in use");
+            ModelState.AddModelError(nameof(stub.Phone), "Phone number is already in use");
         }
         
-        if (!await _userRepo.IsHandleUniqueAsync(stub.Handle))
+        if (await _userRepo.SlugExistsAsync(stub.Slug))
         {
-            ModelState.AddModelError(nameof(stub.Handle), "Handle is already taken");
+            ModelState.AddModelError(nameof(stub.Slug), "Slug is already taken");
         }
         
         if (!ModelState.IsValid)
@@ -61,21 +64,19 @@ public class UsersController : BaseApiController
         var userRecord = new UserRecord
         {
             Id = 0, // Will be set by database
-            Handle = stub.Handle,
-            Email = stub.Email,
+            Slug = stub.Slug,
+            Phone = stub.Phone,
             FirstName = stub.FirstName,
             LastName = stub.LastName,
-            Reference = $"user_{Guid.NewGuid():N}",
-            IsActive = true,
-            IsEmailVerified = false,
+            DeletedAt = null,
             CreatedOn = _clock.Now,
             UpdatedOn = null,
             ConcurrencyToken = null
         };
         
-        var created = await _userRepo.CreateAsync(userRecord);
+        var created = await _crudRepo.CreateAsync(userRecord);
         
-        _logger.LogInformation("User registered: {0} ({1})", created.Id, created.Email);
+        _logger.LogInformation("User registered: {0} ({1})", created.Id, created.Phone);
         
         return Created("GetUserById", new { id = created.Id }, created);
     }
@@ -83,9 +84,8 @@ public class UsersController : BaseApiController
 
 public record UserRegistrationStub
 {
-    public required string Handle { get; init; }
-    public required string Email { get; init; }
+    public required string Slug { get; init; }
+    public required string Phone { get; init; }
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
-    public required string Password { get; init; }
 }

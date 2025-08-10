@@ -17,8 +17,12 @@ public class ApplicationContext : DbContext
     // Entity DbSets
     public DbSet<User> Users => Set<User>();
     public DbSet<Event> Events => Set<Event>();
-    public DbSet<EventAttendance> EventAttendances => Set<EventAttendance>();
+    public DbSet<Invitation> Invitations => Set<Invitation>();
+    public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<IdempotencyBarrier> IdempotencyBarriers => Set<IdempotencyBarrier>();
+    
+    // Remove obsolete DbSet
+    // public DbSet<EventAttendance> EventAttendances => Set<EventAttendance>(); // REMOVED
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,8 +31,8 @@ public class ApplicationContext : DbContext
         // Apply all entity configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
         
-        // Global query filters for soft delete (if needed)
-        // modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+        // Global query filters for soft delete are configured in individual entity configurations
+        // This ensures they are applied consistently and can be easily managed per entity
     }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -46,6 +50,12 @@ public class ApplicationContext : DbContext
         return await base.SaveChangesAsync(cancellationToken);
     }
     
+    public override int SaveChanges()
+    {
+        UpdateTimestamps();
+        return base.SaveChanges();
+    }
+    
     private void UpdateTimestamps()
     {
         var entries = ChangeTracker.Entries()
@@ -58,10 +68,18 @@ public class ApplicationContext : DbContext
             if (entry.State == EntityState.Added)
             {
                 entity.CreatedOn = _clock.GetCurrentInstant();
+                // Ensure UpdatedOn is null for new entities
+                entity.UpdatedOn = null;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entity.UpdatedOn = _clock.GetCurrentInstant();
+                // Don't modify CreatedOn for updates
+                entry.Property(nameof(BaseEntity.CreatedOn)).IsModified = false;
             }
             
-            entity.UpdatedOn = _clock.GetCurrentInstant();
-            entity.ConcurrencyToken = DateTime.UtcNow; // For optimistic concurrency
+            // Always update concurrency token
+            entity.ConcurrencyToken = DateTime.UtcNow;
         }
     }
 }

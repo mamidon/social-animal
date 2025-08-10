@@ -105,7 +105,7 @@ public class UsersController : AdminControllerBase
                 TotalReservations = reservations.Count(),
                 AttendedEvents = reservations.Count(r => r.PartySize > 0),
                 RegretEvents = reservations.Count(r => r.PartySize == 0),
-                TotalPartySize = reservations.Sum(r => r.PartySize)
+                TotalPartySize = (int)reservations.Sum(r => r.PartySize)
             }
         };
 
@@ -337,7 +337,7 @@ public class UsersController : AdminControllerBase
     }
 
     // Helper Methods
-    private bool IsHtmxRequest()
+    private new bool IsHtmxRequest()
     {
         return Request.Headers.ContainsKey("HX-Request");
     }
@@ -358,7 +358,7 @@ public class UsersController : AdminControllerBase
         return View("Form", viewModel);
     }
 
-    private async Task<PagedResult<UserListItem>> GetPagedUsersAsync(UserListRequest request)
+    private Task<PagedResult<UserListItem>> GetPagedUsersAsync(UserListRequest request)
     {
         // This is a simplified implementation - in a real system, this would be in a service
         // For now, we'll create a basic implementation
@@ -414,14 +414,14 @@ public class UsersController : AdminControllerBase
             })
             .ToList();
 
-        return new PagedResult<UserListItem>
+        return Task.FromResult(new PagedResult<UserListItem>
         {
             Data = pagedUsers,
             TotalCount = totalCount,
             Page = request.Page,
             PageSize = request.PageSize,
             TotalPages = (int)Math.Ceiling((double)totalCount / request.PageSize)
-        };
+        });
     }
 
     private string GenerateUsersCsv(IEnumerable<UserListItem> users)

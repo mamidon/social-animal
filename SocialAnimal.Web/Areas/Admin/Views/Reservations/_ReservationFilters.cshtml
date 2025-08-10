@@ -37,8 +37,8 @@
         <label>Attendance</label>
         <select name="isAttending">
             <option value="">All</option>
-            <option value="true" @(Model.IsAttending == true ? "selected" : "")>Attending</option>
-            <option value="false" @(Model.IsAttending == false ? "selected" : "")>Regrets</option>
+            <option value="true" selected="@(Model.IsAttending == true ? "true" : "false")">Attending</option>
+            <option value="false" selected="@(Model.IsAttending == false ? "true" : "false")">Regrets</option>
         </select>
     </div>
     

@@ -29,8 +29,8 @@
         <label>Send Status</label>
         <select name="isSent">
             <option value="">All</option>
-            <option value="true" @(Model.IsSent == true ? "selected" : "")>Sent</option>
-            <option value="false" @(Model.IsSent == false ? "selected" : "")>Not Sent</option>
+            <option value="true" selected="@(Model.IsSent == true ? "true" : "false")">Sent</option>
+            <option value="false" selected="@(Model.IsSent == false ? "true" : "false")">Not Sent</option>
         </select>
     </div>
     
@@ -38,8 +38,8 @@
         <label>Response Status</label>
         <select name="hasResponse">
             <option value="">All</option>
-            <option value="true" @(Model.HasResponse == true ? "selected" : "")>Has Response</option>
-            <option value="false" @(Model.HasResponse == false ? "selected" : "")>No Response</option>
+            <option value="true" selected="@(Model.HasResponse == true ? "true" : "false")">Has Response</option>
+            <option value="false" selected="@(Model.HasResponse == false ? "true" : "false")">No Response</option>
         </select>
     </div>
     

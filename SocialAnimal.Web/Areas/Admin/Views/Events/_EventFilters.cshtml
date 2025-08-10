@@ -25,56 +25,56 @@
                 hx-trigger="change"
                 hx-target="#city-filter">
             <option value="">All States</option>
-            <option value="AL" @(Model.State == "AL" ? "selected" : "")>Alabama</option>
-            <option value="AK" @(Model.State == "AK" ? "selected" : "")>Alaska</option>
-            <option value="AZ" @(Model.State == "AZ" ? "selected" : "")>Arizona</option>
-            <option value="AR" @(Model.State == "AR" ? "selected" : "")>Arkansas</option>
-            <option value="CA" @(Model.State == "CA" ? "selected" : "")>California</option>
-            <option value="CO" @(Model.State == "CO" ? "selected" : "")>Colorado</option>
-            <option value="CT" @(Model.State == "CT" ? "selected" : "")>Connecticut</option>
-            <option value="DE" @(Model.State == "DE" ? "selected" : "")>Delaware</option>
-            <option value="FL" @(Model.State == "FL" ? "selected" : "")>Florida</option>
-            <option value="GA" @(Model.State == "GA" ? "selected" : "")>Georgia</option>
-            <option value="HI" @(Model.State == "HI" ? "selected" : "")>Hawaii</option>
-            <option value="ID" @(Model.State == "ID" ? "selected" : "")>Idaho</option>
-            <option value="IL" @(Model.State == "IL" ? "selected" : "")>Illinois</option>
-            <option value="IN" @(Model.State == "IN" ? "selected" : "")>Indiana</option>
-            <option value="IA" @(Model.State == "IA" ? "selected" : "")>Iowa</option>
-            <option value="KS" @(Model.State == "KS" ? "selected" : "")>Kansas</option>
-            <option value="KY" @(Model.State == "KY" ? "selected" : "")>Kentucky</option>
-            <option value="LA" @(Model.State == "LA" ? "selected" : "")>Louisiana</option>
-            <option value="ME" @(Model.State == "ME" ? "selected" : "")>Maine</option>
-            <option value="MD" @(Model.State == "MD" ? "selected" : "")>Maryland</option>
-            <option value="MA" @(Model.State == "MA" ? "selected" : "")>Massachusetts</option>
-            <option value="MI" @(Model.State == "MI" ? "selected" : "")>Michigan</option>
-            <option value="MN" @(Model.State == "MN" ? "selected" : "")>Minnesota</option>
-            <option value="MS" @(Model.State == "MS" ? "selected" : "")>Mississippi</option>
-            <option value="MO" @(Model.State == "MO" ? "selected" : "")>Missouri</option>
-            <option value="MT" @(Model.State == "MT" ? "selected" : "")>Montana</option>
-            <option value="NE" @(Model.State == "NE" ? "selected" : "")>Nebraska</option>
-            <option value="NV" @(Model.State == "NV" ? "selected" : "")>Nevada</option>
-            <option value="NH" @(Model.State == "NH" ? "selected" : "")>New Hampshire</option>
-            <option value="NJ" @(Model.State == "NJ" ? "selected" : "")>New Jersey</option>
-            <option value="NM" @(Model.State == "NM" ? "selected" : "")>New Mexico</option>
-            <option value="NY" @(Model.State == "NY" ? "selected" : "")>New York</option>
-            <option value="NC" @(Model.State == "NC" ? "selected" : "")>North Carolina</option>
-            <option value="ND" @(Model.State == "ND" ? "selected" : "")>North Dakota</option>
-            <option value="OH" @(Model.State == "OH" ? "selected" : "")>Ohio</option>
-            <option value="OK" @(Model.State == "OK" ? "selected" : "")>Oklahoma</option>
-            <option value="OR" @(Model.State == "OR" ? "selected" : "")>Oregon</option>
-            <option value="PA" @(Model.State == "PA" ? "selected" : "")>Pennsylvania</option>
-            <option value="RI" @(Model.State == "RI" ? "selected" : "")>Rhode Island</option>
-            <option value="SC" @(Model.State == "SC" ? "selected" : "")>South Carolina</option>
-            <option value="SD" @(Model.State == "SD" ? "selected" : "")>South Dakota</option>
-            <option value="TN" @(Model.State == "TN" ? "selected" : "")>Tennessee</option>
-            <option value="TX" @(Model.State == "TX" ? "selected" : "")>Texas</option>
-            <option value="UT" @(Model.State == "UT" ? "selected" : "")>Utah</option>
-            <option value="VT" @(Model.State == "VT" ? "selected" : "")>Vermont</option>
-            <option value="VA" @(Model.State == "VA" ? "selected" : "")>Virginia</option>
-            <option value="WA" @(Model.State == "WA" ? "selected" : "")>Washington</option>
-            <option value="WV" @(Model.State == "WV" ? "selected" : "")>West Virginia</option>
-            <option value="WI" @(Model.State == "WI" ? "selected" : "")>Wisconsin</option>
-            <option value="WY" @(Model.State == "WY" ? "selected" : "")>Wyoming</option>
+            <option value="AL" selected="@(Model.State == "AL" ? "true" : "false")">Alabama</option>
+            <option value="AK" selected="@(Model.State == "AK" ? "true" : "false")">Alaska</option>
+            <option value="AZ" selected="@(Model.State == "AZ" ? "true" : "false")">Arizona</option>
+            <option value="AR" selected="@(Model.State == "AR" ? "true" : "false")">Arkansas</option>
+            <option value="CA" selected="@(Model.State == "CA" ? "true" : "false")">California</option>
+            <option value="CO" selected="@(Model.State == "CO" ? "true" : "false")">Colorado</option>
+            <option value="CT" selected="@(Model.State == "CT" ? "true" : "false")">Connecticut</option>
+            <option value="DE" selected="@(Model.State == "DE" ? "true" : "false")">Delaware</option>
+            <option value="FL" selected="@(Model.State == "FL" ? "true" : "false")">Florida</option>
+            <option value="GA" selected="@(Model.State == "GA" ? "true" : "false")">Georgia</option>
+            <option value="HI" selected="@(Model.State == "HI" ? "true" : "false")">Hawaii</option>
+            <option value="ID" selected="@(Model.State == "ID" ? "true" : "false")">Idaho</option>
+            <option value="IL" selected="@(Model.State == "IL" ? "true" : "false")">Illinois</option>
+            <option value="IN" selected="@(Model.State == "IN" ? "true" : "false")">Indiana</option>
+            <option value="IA" selected="@(Model.State == "IA" ? "true" : "false")">Iowa</option>
+            <option value="KS" selected="@(Model.State == "KS" ? "true" : "false")">Kansas</option>
+            <option value="KY" selected="@(Model.State == "KY" ? "true" : "false")">Kentucky</option>
+            <option value="LA" selected="@(Model.State == "LA" ? "true" : "false")">Louisiana</option>
+            <option value="ME" selected="@(Model.State == "ME" ? "true" : "false")">Maine</option>
+            <option value="MD" selected="@(Model.State == "MD" ? "true" : "false")">Maryland</option>
+            <option value="MA" selected="@(Model.State == "MA" ? "true" : "false")">Massachusetts</option>
+            <option value="MI" selected="@(Model.State == "MI" ? "true" : "false")">Michigan</option>
+            <option value="MN" selected="@(Model.State == "MN" ? "true" : "false")">Minnesota</option>
+            <option value="MS" selected="@(Model.State == "MS" ? "true" : "false")">Mississippi</option>
+            <option value="MO" selected="@(Model.State == "MO" ? "true" : "false")">Missouri</option>
+            <option value="MT" selected="@(Model.State == "MT" ? "true" : "false")">Montana</option>
+            <option value="NE" selected="@(Model.State == "NE" ? "true" : "false")">Nebraska</option>
+            <option value="NV" selected="@(Model.State == "NV" ? "true" : "false")">Nevada</option>
+            <option value="NH" selected="@(Model.State == "NH" ? "true" : "false")">New Hampshire</option>
+            <option value="NJ" selected="@(Model.State == "NJ" ? "true" : "false")">New Jersey</option>
+            <option value="NM" selected="@(Model.State == "NM" ? "true" : "false")">New Mexico</option>
+            <option value="NY" selected="@(Model.State == "NY" ? "true" : "false")">New York</option>
+            <option value="NC" selected="@(Model.State == "NC" ? "true" : "false")">North Carolina</option>
+            <option value="ND" selected="@(Model.State == "ND" ? "true" : "false")">North Dakota</option>
+            <option value="OH" selected="@(Model.State == "OH" ? "true" : "false")">Ohio</option>
+            <option value="OK" selected="@(Model.State == "OK" ? "true" : "false")">Oklahoma</option>
+            <option value="OR" selected="@(Model.State == "OR" ? "true" : "false")">Oregon</option>
+            <option value="PA" selected="@(Model.State == "PA" ? "true" : "false")">Pennsylvania</option>
+            <option value="RI" selected="@(Model.State == "RI" ? "true" : "false")">Rhode Island</option>
+            <option value="SC" selected="@(Model.State == "SC" ? "true" : "false")">South Carolina</option>
+            <option value="SD" selected="@(Model.State == "SD" ? "true" : "false")">South Dakota</option>
+            <option value="TN" selected="@(Model.State == "TN" ? "true" : "false")">Tennessee</option>
+            <option value="TX" selected="@(Model.State == "TX" ? "true" : "false")">Texas</option>
+            <option value="UT" selected="@(Model.State == "UT" ? "true" : "false")">Utah</option>
+            <option value="VT" selected="@(Model.State == "VT" ? "true" : "false")">Vermont</option>
+            <option value="VA" selected="@(Model.State == "VA" ? "true" : "false")">Virginia</option>
+            <option value="WA" selected="@(Model.State == "WA" ? "true" : "false")">Washington</option>
+            <option value="WV" selected="@(Model.State == "WV" ? "true" : "false")">West Virginia</option>
+            <option value="WI" selected="@(Model.State == "WI" ? "true" : "false")">Wisconsin</option>
+            <option value="WY" selected="@(Model.State == "WY" ? "true" : "false")">Wyoming</option>
         </select>
     </div>
     
